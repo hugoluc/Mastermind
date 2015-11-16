@@ -1,24 +1,18 @@
 
   var fbUserId;
-  function setCookie(variable, value, expires_seconds) {
-    var d = new Date();
-    d = new Date(d.getTime() + 1000 * expires_seconds);
-    document.cookie = variable + '=' + value + '; expires=' + d.toGMTString() + ';';
-  }
-
-
 
   function checkLoginState() {
     console.log("checkloginstate");
+    
     FB.getLoginStatus(function(response) {
       console.log(response);
       if(response.status === "connected"){
         console.log("connected");
-       //window.location = "http://104.131.172.143:3000/PDS/Mastermind/home.html";
+       window.location = "http://104.131.172.143:3000/PDS/Mastermind/game.html";
       }else{
         // display login screen
         console.log("not logged in");
-        fbButton = '<div onclick="fb_login();">FACIBUQUI</div>'
+        fbButton = '<div onclick="fb_login();">Click Here to login</div>'
         document.body.innerHTML = fbButton;
       }
 
