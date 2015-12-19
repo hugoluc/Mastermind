@@ -17,7 +17,7 @@ function Mastermind(_game){
 		["#5E94EA","#4C7BC1"],
 		["#B260E8","#8E4CC1"],
 		["#ED5DC8","#B5439D"],
-	]		
+	]
 
 	this.custom = []
 }
@@ -57,7 +57,7 @@ Mastermind.prototype.getGameCount = function(){
 }
 
 Mastermind.prototype.setData = function(_data){
-		
+
 		this.gameCount = _data
 		console.log(this.gameCount)
 }
@@ -68,27 +68,28 @@ Mastermind.prototype.createLevel = function(_secretSize,_dictSize,_fullDictonary
 	this.logic = new logic(this,this.game,_secretSize,_dictSize,_fullDictonary,_dificulty,_secretContructor)
 	this.dictSize = _dictSize
 	this.secretSize = _secretSize
-	this.dificulty = _dificulty	
+	this.dificulty = _dificulty
 
 	this.displayLevel()
 	this.logic.setGuessTarget()
 
 	this.gameCount++
 	this.game.logData("gameCount",this.gameCount)
-	
+
 	var path = "games/" + this.gameCount
 
 	var now = getCurretTime()
 
-	data = {
-
+	// only push when game or session is over
+	this.data = {
 		started : now,
 		Nholes : _secretSize,
 		Ncolors : _dictSize,
-		dificulty : _dificulty,
+		NallowedGuesses : _dificulty,
+		guesses : [],
+		NguessesMade : 0 // guesses: {0:[], 1:[]}
 	}
-	
-	this.game.logData(path,data)
+
 }
 
 Mastermind.prototype.init = function(){
@@ -103,7 +104,7 @@ Mastermind.prototype.displayLevel = function(){
 
 	this.drawBoard();
 	this.drawDashboard(false);
-	
+
 	this.game.experiment.display()
 }
 
@@ -112,7 +113,7 @@ Mastermind.prototype.update = function(){
 	//refresh all game variables based on screen size
 	this.game.refresh();
 
-	// redraw all objects that are active 
+	// redraw all objects that are active
 	if(this.game.experiment != undefined){
 
 		if(this.game.experiment.getStatus()){
@@ -123,16 +124,16 @@ Mastermind.prototype.update = function(){
 		}
 	}
 
-	if(this.game.winScreen.getStatus()) this.drawWinScreen(true)	
+	if(this.game.winScreen.getStatus()) this.drawWinScreen(true)
 	if(this.game.looseScreen.getStatus()) this.drawLooseScreen(true)
 	if(this.game.customScreen.getStatus()){
 
 		switch(this.custom){
-		
+
 			case "levelSelector":
 				this.levelSelector(true)
 				break
-		
+
 			case "loginPage":
 				this.loginPage(true)
 				break
@@ -146,13 +147,13 @@ Mastermind.prototype.update = function(){
 
 //check if the function was called to update or create the graphics
 Mastermind.prototype.checkUpdate = function(_update,_object,_target){
-	
+
 	if(_update){
 
 		var obj = {
 			"id" : _object.id,
 			"child" : _object.child,
-			"dashboardId" : _object.dashboardId, 
+			"dashboardId" : _object.dashboardId,
 			"x" : _object.x,
 			"y" : _object.y,
 			"x1" : _object.x1,
@@ -167,12 +168,12 @@ Mastermind.prototype.checkUpdate = function(_update,_object,_target){
 			"strokeWidth" : _object.strokeWidth,
 			"r" : _object.r
 		}
-		
+
 		this.game[_target].updateSVGs(obj)
-	
+
 	}else {
-	
-		this.game[_target].addSVG(_object);			
+
+		this.game[_target].addSVG(_object);
 	}
 }
 
@@ -220,12 +221,12 @@ Mastermind.prototype.drawBoard = function(update){
 			 			id = id.split("-")
 			 			mastermind.logic.setGuessTarget(id[1],id[0])
 
-			 		} 
+			 		}
 				}
 
 				this.checkUpdate(update,object,"experiment")
 			}
-			
+
 
 			if(i != 0){
 				this.checkUpdate(update,{
@@ -238,12 +239,12 @@ Mastermind.prototype.drawBoard = function(update){
 					"y2" : i * this.radius*2.5,
 					"fill" : "#EDEDED",
 					"strokeWidth" : 1.5,
-				},"experiment")					
+				},"experiment")
 			}
 
 		}
 
-	//------------------Selectors bar 
+	//------------------Selectors bar
 
 		object={
 			"id" : "selectorBar",
@@ -320,10 +321,10 @@ Mastermind.prototype.drawBoard = function(update){
 				 "x" : this.hBar.x + (j*this.hBar.width/2.6) + 2*this.radius,
 				 "y" : this.gBar.height - this.gBar.hSpacing - this.radius - (i*(this.radius*2+2*this.gBar.hSpacing)) + this.radius*0.3,
 				 "fill" : "#383431",
-				 "size" : this.radius*0.95, 
+				 "size" : this.radius*0.95,
 				 "text" : "",
 				}
-			
+
 			if(j==0){object.fill = "#F4EEA6"}else{object.fill = "#E2E2E2"}
 
 			this.checkUpdate(update,object,"experiment")
@@ -335,7 +336,7 @@ Mastermind.prototype.drawBoard = function(update){
 
 	//--------------------- locator
 
-		locPos = this.logic.getLocPos() 
+		locPos = this.logic.getLocPos()
 
 		if( locPos[0] == undefined || locPos[1] == undefined ){
 
@@ -368,10 +369,10 @@ Mastermind.prototype.drawBoard = function(update){
 	 		"stroke" : "#E8E6E2",
 	 		"click" : {}
 
-			}	
-		
+			}
 
-		} 
+
+		}
 
 		this.checkUpdate(update,object,"experiment")
 
@@ -426,13 +427,13 @@ Mastermind.prototype.boardPropotions = function(){
 			"wSpacing" : 0.125,
 			"hSpacing" : 0.25,
 		},
-		
+
 		hBar : {
 			"width" : 5.5,
 			"x" : 0,
 		},
 
-	}	
+	}
 
 	boardProportions.gBar.width =  (4*boardProportions.gBar.margin) + boardProportions.gBar.wSpacing + this.secretSize*((2*boardProportions.radius)+boardProportions.gBar.wSpacing)
 	boardProportions.gBar.height =  (this.dificulty*boardProportions.radius*2) + (2*this.dificulty*(boardProportions.gBar.hSpacing))
@@ -460,13 +461,13 @@ Mastermind.prototype.getBoardRadius = function(){
 		"height" : this.game.experiment.scene.height
 	}
 
-	var wRadius = this.game.experiment.scene.width/(proportions.nBar.width + proportions.gBar.width + proportions.hBar.width) 
+	var wRadius = this.game.experiment.scene.width/(proportions.nBar.width + proportions.gBar.width + proportions.hBar.width)
 	var hRadius = this.game.experiment.scene.height/(proportions.sBar.height + proportions.gBar.height + proportions.sBar.gap)
 
 
 	if(wRadius < hRadius){
 		this.radius = wRadius;
-	}else{	
+	}else{
 		this.radius = hRadius
 	}
 
@@ -484,7 +485,7 @@ Mastermind.prototype.getBoardRadius = function(){
 		this.sBar.radius = wSelectorRadius*0.9
 	}
 
-	this.sBar.width = this.dictSize*(this.sBar.radius*2) + (this.dictSize+1) * this.sBar.margin 
+	this.sBar.width = this.dictSize*(this.sBar.radius*2) + (this.dictSize+1) * this.sBar.margin
 	this.sBar.x =  ((this.gBar.width+this.hBar.width+this.nBar.width-this.sBar.width)/2)+this.hBar.x
 }
 
@@ -494,7 +495,7 @@ Mastermind.prototype.getBoardSizes = function(){
 		this.mobile = true;
 	}else{
 		this.mobile = false;
-	}	
+	}
 
 	var proportions = this.boardPropotions()
 
@@ -513,14 +514,14 @@ Mastermind.prototype.getBoardSizes = function(){
 
 	this.nBar = {
 		"width" : proportions.nBar.width*this.radius,
-	}	
+	}
 
 	this.gBar = {
 		"margin" : proportions.gBar.margin*this.radius,
 		"wSpacing" : proportions.gBar.wSpacing*this.radius,
 		"hSpacing" : proportions.gBar.hSpacing*this.radius,
 	}
-	
+
 	this.hBar = {
 		"width" : proportions.hBar.width*this.radius,
 	}
@@ -550,7 +551,7 @@ Mastermind.prototype.getBoardSizes = function(){
 		this.game.experiment.setOffset(offset)
 	}else{
 		this.game.experiment.setOffset(0)
-	} 
+	}
 }
 
 //---------------------------------------------------DashBoard
@@ -571,7 +572,7 @@ Mastermind.prototype.drawDashboard = function(update){
 		"height" : this.game.experiment.widgets[0].height,
 		"fill" : "#22516B",
 	}
-	
+
 	if(this.mobile) mobilex = this.game.experiment.widgets[0].width/2 - object.width/2
 
 	object.x = mobilex
@@ -590,7 +591,7 @@ Mastermind.prototype.drawDashboard = function(update){
 		 "text" : "CHECK",
 		 "fontWeight" : "bold",
 		 "fill" : "#79A5B5",
-	
+
 	},"experiment")
 
 	//this.checkUpdate(update,object,"experiment")
@@ -713,9 +714,9 @@ Mastermind.prototype.levelSelector = function(update){
 	button.x = this.game.customScreen.width/2 - button.width/2
 
 	//-------------------------------------------------------------------------------------------------------------normal
-	
+
 	button = {
-	
+
 		"id" : "easy",
 		 "type" : "rect",
 		 "x" : this.game.customScreen.width*0.5 - button.width*0.5 ,
@@ -731,7 +732,7 @@ Mastermind.prototype.levelSelector = function(update){
 			event.preventDefault()
 		 	game.customScreen.pop()
 
-			var dictionary = [1,2,3,4,5,6,7,8] 
+			var dictionary = [1,2,3,4,5,6,7,8]
 		 	mastermind.createLevel(4,5,dictionary,10,1)
 
 		 }
@@ -754,7 +755,7 @@ Mastermind.prototype.levelSelector = function(update){
 			event.preventDefault()
 		 	game.customScreen.pop()
 
-			var dictionary = [1,2,3,4,5,6,7,8] 
+			var dictionary = [1,2,3,4,5,6,7,8]
 		 	mastermind.createLevel(4,5,dictionary,10,1)
 
 		 }
@@ -780,7 +781,7 @@ Mastermind.prototype.levelSelector = function(update){
 		 	console.log(this)
 		 	game.customScreen.pop()
 
-			var dictionary = [1,2,3,4,5,6,7,8] 
+			var dictionary = [1,2,3,4,5,6,7,8]
 		 	mastermind.createLevel(4,5,dictionary,10,1)
 
 		 }
@@ -795,15 +796,15 @@ Mastermind.prototype.levelSelector = function(update){
 		 "fill" : "#A58E2F",
 		 "text" : "Normal",
 		 "size" : this.game.customScreen.height*0.05,
-		 "fontWeight" : "400",		 
+		 "fontWeight" : "400",
 		 "align" : "left",
 		 "click" : function(){
 		 	event.preventDefault()
 		 	game.customScreen.pop()
-			var dictionary = [1,2,3,4,5,6,7,8] 
+			var dictionary = [1,2,3,4,5,6,7,8]
 		 	mastermind.createLevel(5,6,dictionary,10,1)
 
-		 }		 
+		 }
 
 	}
 	this.checkUpdate(update,buttonText,"customScreen")
@@ -811,7 +812,7 @@ Mastermind.prototype.levelSelector = function(update){
 
 	//-----------------------------------------------------------------------------------------------------------------------hard
 	button = {
-	
+
 		"id" : "hard",
 		 "type" : "rect",
 		 "x" :  this.game.customScreen.width*0.5 - button.width/2,
@@ -825,7 +826,7 @@ Mastermind.prototype.levelSelector = function(update){
 
 		 	game.customScreen.pop()
 
-			var dictionary = [1,2,3,4,5,6,7,8] 
+			var dictionary = [1,2,3,4,5,6,7,8]
 		 	mastermind.createLevel(5,7,dictionary,10,1)
 
 		 }
@@ -841,15 +842,15 @@ Mastermind.prototype.levelSelector = function(update){
 		 "fill" : "#A58E2F",
 		 "text" : "Hard",
 		 "align" : "left",
-		 "fontWeight" : "400",		 
+		 "fontWeight" : "400",
 		 "size" : this.game.customScreen.height*0.05,
 		 "click" : function(){
 		 	event.preventDefault()
 		 	game.customScreen.pop()
-			var dictionary = [1,2,3,4,5,6,7,8] 
+			var dictionary = [1,2,3,4,5,6,7,8]
 		 	mastermind.createLevel(5,7,dictionary,10,1)
 
-		 }		 
+		 }
 
 	}
 	this.checkUpdate(update,buttonText,"customScreen")
@@ -952,8 +953,8 @@ Mastermind.prototype.drawWinScreen = function(_score,update){
 		 	game.winScreen.pop()
 		 	console.log("experiment")
 		 	game.experiment.pop()
- 
-		 	var dictionary = [1,2,3,4,5,6,7,8] 
+
+		 	var dictionary = [1,2,3,4,5,6,7,8]
 		 	mastermind.createLevel(mastermind.secretSize,mastermind.dictSize,dictionary,10,1)
 
 		 }
@@ -978,7 +979,7 @@ Mastermind.prototype.drawWinScreen = function(_score,update){
 		 	console.log("experiment")
 		 	game.experiment.pop()
 
-		 	var dictionary = [1,2,3,4,5,6,7,8] 
+		 	var dictionary = [1,2,3,4,5,6,7,8]
 		 	mastermind.createLevel(mastermind.secretSize,mastermind.dictSize,dictionary,10,1)
 
 		 }
@@ -1144,8 +1145,8 @@ Mastermind.prototype.drawLooseScreen = function(update){
 		 	game.winScreen.pop()
 		 	console.log("experiment")
 		 	game.experiment.pop()
- 
-		 	var dictionary = [1,2,3,4,5,6,7,8] 
+
+		 	var dictionary = [1,2,3,4,5,6,7,8]
 		 	mastermind.createLevel(mastermind.secretSize,mastermind.dictSize,dictionary,10,1)
 
 		 }
@@ -1170,7 +1171,7 @@ Mastermind.prototype.drawLooseScreen = function(update){
 		 	console.log("experiment")
 		 	game.experiment.pop()
 
-		 	var dictionary = [1,2,3,4,5,6,7,8] 
+		 	var dictionary = [1,2,3,4,5,6,7,8]
 		 	mastermind.createLevel(mastermind.secretSize,mastermind.dictSize,dictionary,10,1)
 
 		 }
@@ -1244,7 +1245,7 @@ Mastermind.prototype.loginpageProportions = function(){
 
 	proportions = {
 		area : { height : 14, width : 9,},
-		inputbox : {height : 1, width : 8,} 
+		inputbox : {height : 1, width : 8,}
 	}
 
 	return proportions
@@ -1256,7 +1257,7 @@ Mastermind.prototype.loginPage = function(update){
 
 	proportions = this.loginpageProportions()
 	referece = this.game.customScreen.height/proportions.area.height
-	
+
 	proportions.area.x = this.game.customScreen.width/2 - (proportions.area.width/2)*referece
 	proportions.area.y = this.game.customScreen.y + referece*2
 
@@ -1298,7 +1299,7 @@ Mastermind.prototype.loginPage = function(update){
 	emailBox.style.borderRadius = (referece*0.12)+"px"
 
 	this.checkUpdate(update, {
-	
+
 		"id" : "email-Title",
 		"child" : "customScreen",
 		"type" : "text",
@@ -1325,7 +1326,7 @@ Mastermind.prototype.loginPage = function(update){
 	passwordBox.style.borderRadius = (referece*0.12)+"px"
 
 	this.checkUpdate(update, {
-	
+
 		"id" : "password-Title",
 		"child" : "customScreen",
 		"type" : "text",
@@ -1358,7 +1359,7 @@ Mastermind.prototype.loginPage = function(update){
 
 	}
 
-	//register button 
+	//register button
 	this.checkUpdate(update, {
 		"id" : "register-button",
 		"child" : "customScreen",
@@ -1493,10 +1494,10 @@ Mastermind.prototype.loginPage = function(update){
 	logic.prototype.setGuessTarget = function(_col,_row){
 
 		if(_col === true){
-			
+
 			this.lastTarget.row = this.guessTarget.row
 			this.lastTarget.column = this.guessTarget.column
-	
+
 			obj = {
 
 				"id" : "target-indicator",
@@ -1515,13 +1516,13 @@ Mastermind.prototype.loginPage = function(update){
 			if(_row != this.guessTarget.row || _col != this.guessTarget.column){
 				this.lastTarget.row = this.guessTarget.row
 				this.lastTarget.column = this.guessTarget.column
-			}	
+			}
 
 		}else{
 			this.lastTarget.row = this.guessTarget.row
 			this.lastTarget.column = this.guessTarget.column
 		}
-	
+
 
 
 		if(_row != undefined && _col != undefined ){
@@ -1532,7 +1533,7 @@ Mastermind.prototype.loginPage = function(update){
 			 	return
 			 }
 
-			this.guessTarget.column = _col 
+			this.guessTarget.column = _col
 			this.guessTarget.row =  _row
 
 		}else if(this.guess.length > 0){
@@ -1541,26 +1542,26 @@ Mastermind.prototype.loginPage = function(update){
 			for (var i = 0; i<this.guess.length+1; i++){
 
 				if(this.guess[i] == undefined){
-		
-					this.guessTarget.column = i	
-			 		this.guessTarget.row =  Math.floor(this.valuesSelected/this.secretSize) 		
-					
+
+					this.guessTarget.column = i
+			 		this.guessTarget.row =  Math.floor(this.valuesSelected/this.secretSize)
+
 					break
 				}
 
 			}
 
 		} else{
-		
-			this.guessTarget.column = 0	
-			this.guessTarget.row = Math.floor(this.valuesSelected/this.secretSize)  
+
+			this.guessTarget.column = 0
+			this.guessTarget.row = Math.floor(this.valuesSelected/this.secretSize)
 
 		}
 
-		if (this.guess[_col] != undefined) { 
+		if (this.guess[_col] != undefined) {
 
-			
-			this.mastermind.setcheckButton(false)	
+
+			this.mastermind.setcheckButton(false)
 
 		 	this.guess[_col] = undefined
 		 	this.valuesSelected--
@@ -1587,7 +1588,7 @@ Mastermind.prototype.loginPage = function(update){
 
 		// console.log(game.experiment.SVG["target-indicator"])
 		target = game.experiment.SVG[this.guessTarget.row + "-" + this.guessTarget.column]
-		
+
 		obj = {
 
 			"id" : "target-indicator",
@@ -1619,7 +1620,7 @@ Mastermind.prototype.loginPage = function(update){
 	}
 
 	logic.prototype.generateSecret = function(){
-		
+
 		for(var i=0;i<this.secretSize;i++){
 
 			var valuePicker = Math.floor((Math.random() * this.dictSize) + 0);
@@ -1635,14 +1636,14 @@ Mastermind.prototype.loginPage = function(update){
 
 		if(!this.checkGuessFinished()){
 
-			var row =  Math.floor(this.valuesSelected/this.secretSize) 	
+			var row =  Math.floor(this.valuesSelected/this.secretSize)
 			this.valuesSelected++
 
 			//var target = document.getElementById(this.guestTarget.row + "-" + this.guestTarget.column)
 			var target = document.getElementById(this.guessTarget.row + "-" + this.guessTarget.column)
-			
+
 			var radius = target.getAttribute("r")
-			
+
 			var obj= {
 
 				"id" : this.guessTarget.row + "-" + this.guessTarget.column,
@@ -1650,19 +1651,19 @@ Mastermind.prototype.loginPage = function(update){
 				"stroke" : _pegData[1],
 				"strokeWidth": this.radius*0.15,
 				"r" : this.radius*0.9
-			
+
 			}
 
 			game.experiment.updateSVGs(obj)
 
 			//-------------------------------------------------------------------
 			this.guess[this.guessTarget.column] = {"value":_pegValue,"checked":false}
-	
+
 
 				if(this.checkGuessFinished()){
 
 					this.setGuessTarget(_final=true)
-					this.mastermind.setcheckButton(true,row)	
+					this.mastermind.setcheckButton(true,row)
 
 				}else{
 
@@ -1670,20 +1671,20 @@ Mastermind.prototype.loginPage = function(update){
 
 				}
 
-			} 
+			}
 
 		return this.guess
 	}
 
 	logic.prototype.checkGuessFinished = function(){
 
-		for(var i=0;i<this.secretSize; i++){			
+		for(var i=0;i<this.secretSize; i++){
 
 			if(this.guess[i] == undefined){
 				return false;
 			}
 		}
-	
+
 		return true
 	}
 
@@ -1692,15 +1693,13 @@ Mastermind.prototype.loginPage = function(update){
 
 		var path = "guesses/game_" + this.mastermind.gameCount + "/" + _row
 
-		//logdaga
-		data = []
-
+		newGuess = []
 		for (var i=0; i<this.guess.length; i++){
-			data.push(this.guess[i].value)
-
+			newGuess.push(this.guess[i].value)
 		}
 
-		this.game.logData(path,data)
+		mastermind.data.guesses.push(newGuess)
+		//this.game.logData(path,data)
 
 		var secret = this.getSecret()
 
@@ -1713,7 +1712,7 @@ Mastermind.prototype.loginPage = function(update){
 
 			hint.correctPosition = this.getCorrectPositions(secret)
 			hint.correctValue = this.getCorrectValue(secret)
-		
+
 
 			for(var i=0;i<secret.length; i++){
 				secret[i].checked = false
@@ -1725,15 +1724,15 @@ Mastermind.prototype.loginPage = function(update){
 					"id" : "hint-" + 0 + "-" + _row,
 					"type" : "text",
 					"child" : "experiment",
-					"text" : hint.correctPosition,	
-				
+					"text" : hint.correctPosition,
+
 				})
 
 
 				this.game.experiment.updateSVGs({
 					"id" : "hint-circle-0-" + _row,
 					"type" : "circle",
-					"child" : "experiment", 
+					"child" : "experiment",
 					"fill" : "#CCBD1D",
 					"stroke" : "#AFA305",
 					"opacity" : 100,
@@ -1747,17 +1746,17 @@ Mastermind.prototype.loginPage = function(update){
 					"id" : "hint-" + 1 + "-" + _row,
 					"type" : "text",
 					"child" : "experiment",
-					"text" : hint.correctValue,	
+					"text" : hint.correctValue,
 				})
-			
+
 				this.game.experiment.updateSVGs({
 					"id" : "hint-circle-1-" + _row,
 					"type" : "circle",
-					"child" : "experiment", 
+					"child" : "experiment",
 					"fill" : "#A5A5A5",
 					"stroke" : "#919190",
 					"opacity" : 100,
-					"r" : this.radius*0.8,				
+					"r" : this.radius*0.8,
 				})
 			}
 		}
@@ -1770,23 +1769,29 @@ Mastermind.prototype.loginPage = function(update){
 			this.mastermind.score += gameScore;
 			this.mastermind.displayWinScreen(gameScore)
 
-			var path = "games/" + this.mastermind.gameCount			
-			game.pushData(path, {end : getCurretTime()})
-			game.pushData(path, { status : "win",})
-
 			console.log("youwin!");
+			var path = "games/" + this.mastermind.gameCount
+			mastermind.data.end = getCurretTime()
+			mastermind.data.NguessesMade = this.guessesMade
+			game.pushData(path, mastermind.data)
+
+			this.mastermind.displayWinScreen()
+			console.log("won--data written:");
+			console.log(mastermind.data);
 			return
 
 		//-- player loose the game!
 		} else if (_row == this.dificulty-1){
 
 			var path = "games/" + this.mastermind.gameCount
-			
-			game.pushData(path, {end : getCurretTime()})
-			game.pushData(path, { status : "lose",})
+
+			mastermind.data.end = getCurretTime()
+			mastermind.data.NguessesMade = this.guessesMade
+			game.pushData(path, mastermind.data)
 
 			this.mastermind.displayLooseScreen()
-			console.log("youloose")
+			console.log("lost--data written:");
+			console.log(mastermind.data);
 			return
 		}
 
@@ -1838,25 +1843,25 @@ Mastermind.prototype.loginPage = function(update){
 	var game = new Game("Pedro", 10);
 	var mastermind = new Mastermind(game);
 	var fireBase = new Firebase("https://psymastermind.firebaseio.com/")
-	
-	window.addEventListener("resize", function(){ 
+
+	window.addEventListener("resize", function(){
 
 		mastermind.update();
 
 	});
 
     var	getCurretTime = function(){
- 
+
  		d = new Date();
 		second = d.getTime()
-		return second 
+		return second
 
 	}
 
 	function checkPrivate(){
 		try {
 		  // try to use localStorage
-		  localStorage.test = 2;        
+		  localStorage.test = 2;
 		} catch (e) {
 		  // there was an error so...
 		  alert('You are in Privacy Mode\nPlease click on the button on the bottom right corner, deactivate Private Mode and then reload the page.\n');
@@ -1869,7 +1874,7 @@ Mastermind.prototype.loginPage = function(update){
 	WebFontConfig = {
     	google: { families: [ 'Roboto:100,200,300,400,500,00,700,:latin' ] }
   	};
-  
+
   	(function() {
 	    var wf = document.createElement('script');
 	    wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
@@ -1884,7 +1889,7 @@ Mastermind.prototype.loginPage = function(update){
 
 	fireBase.onAuth(function(authData){
 		if(authData){
-			game.setUserId(authData.uid) 
+			game.setUserId(authData.uid)
 			game.customScreen.pop()
 			var body = document.getElementById("body")
 			aouth = document.getElementById("aouth")
@@ -1897,7 +1902,6 @@ Mastermind.prototype.loginPage = function(update){
 
 			if(game.experiment.getStatus()) game.experiment.pop()
 			if(game.customScreen.getStatus()) game.customScreen.pop()
-			mastermind.init()		
+			mastermind.init()
 		}
 	});
-
