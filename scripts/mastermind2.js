@@ -629,7 +629,6 @@ Mastermind.prototype.setcheckButton = function(_ready,_data){
 }
 
 //----------------------------------------------------Level selector
-
 Mastermind.prototype.levelSelector = function(update){
 
 
@@ -979,7 +978,7 @@ Mastermind.prototype.drawWinScreen = function(update){
 	},"winScreen")
 }
 
-//----------------------------------------------------Win Screen
+//----------------------------------------------------lose Screen
 
 Mastermind.prototype.displayLooseScreen = function(){
 
@@ -1820,7 +1819,8 @@ Mastermind.prototype.loginPage = function(update){
 			aouth = document.getElementById("aouth")
 			if(aouth != undefined) body.removeChild(aouth)
 			mastermind.gameStart()
-		
+
+
 		}else{
 
 			if(game.experiment.getStatus()) game.experiment.pop()
