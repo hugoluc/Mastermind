@@ -117,7 +117,6 @@ Game.prototype.register = function(email,password){
 	 	}
 	 	this.active = false;
 	 	this.init()
-
 	}
 
 	Area.prototype.getStatus = function(){
@@ -171,7 +170,6 @@ Game.prototype.register = function(email,password){
 
 		if(_x != undefined) {this.offset.x = _x}
 		if(_y != undefined) {this.offset.y = _y}
-
 	}
 
 	Area.prototype.display = function() {
