@@ -26,11 +26,6 @@ Game.prototype.setUserId = function(_id){
 	this.uid = _id
 }
 
-Game.prototype.generateExperiment = function(_name){
-	
-
-}
-
 Game.prototype.update = function(){
 
 
@@ -79,8 +74,14 @@ Game.prototype.login = function(email,password,callback){
 }
 
 Game.prototype.logData = function(_path,_data){
-	
+
 	fireBase.child("users/" + this.uid + "/" + _path).set(_data);	
+}
+
+Game.prototype.pushData = function(_path,_data){
+
+	fireBase.child("users/" + this.uid + "/" + _path).push(_data);		
+
 }
 
 Game.prototype.register = function(email,password){
@@ -191,7 +192,6 @@ Game.prototype.register = function(email,password){
 		this.container.append(description.type).attr("id", description.id)		
 		description = this.adjustPosition(description)
 		this.SVG[description.id] = description 
-
 	}
 
 	Area.prototype.updateSVGs = function(_description){ 
@@ -415,7 +415,8 @@ winScreen.prototype.display = function(){
 }
 
 //---------------------------------menu
- function headerMenu(container){
+
+function headerMenu(container){
  	this.container = container
   	this.width = window.innerWidth
 	this.height = window.innerHeight*0.08
@@ -528,11 +529,11 @@ winScreen.prototype.display = function(){
 
 		}
 	})
-
 }
 
 
 //---------------------------------customScreen
+ 
  function customScreen(container,header){
  	this.container = container
  	this.header = header
