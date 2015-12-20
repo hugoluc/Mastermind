@@ -7,6 +7,7 @@ function Mastermind(_game){
 	this.game = _game
 	this.score = 0
 	this.tutorialStep = 0
+	this.displayTutorial = false
 
 	this.colors = [
 		["#F45858","#CC3E3E"],
@@ -24,25 +25,12 @@ function Mastermind(_game){
 
 Mastermind.prototype.getGameCount = function(){
 
-
-	console.log("geting game count")
-	
 	function set_Data(data){
-		mastermind.setData(data.val())
 		
-		data = 0
-
-		//check if is the first game of this player
-		if(data > 0){
-			// select level			
-			mastermind.levelSelector()
-			mastermind.game.customScreen.display()
-
-		} else{
-			//dispaly totorial 
-			mastermind.tutorial(false)
-			mastermind.game.customScreen.display()
-		}
+		console.log("setting game count:")
+		mastermind.setData(data.val())		
+		mastermind.levelSelector()
+		mastermind.game.customScreen.display()
 
 	}
 
@@ -90,13 +78,19 @@ Mastermind.prototype.createLevel = function(_secretSize,_dictSize,_fullDictonary
 		NguessesMade : 0 // guesses: {0:[], 1:[]}
 	}
 
+	if(!this.displayTutorial){
+		this.displayTutorial = true
+		this.displayNextTutorial(0)
+	}
 }
 
 Mastermind.prototype.init = function(){
+	
 	this.loginPage()
 }
 
 Mastermind.prototype.gameStart = function(){
+	console.log("stating the game")
 	this.getGameCount()
 }
 
@@ -139,7 +133,7 @@ Mastermind.prototype.update = function(){
 				break
 
 			case "tutorial":
-				this.tutorial(true)
+				this.tutorial(true,this.tutorialStep)
 				break
 		}
 	}
@@ -165,6 +159,7 @@ Mastermind.prototype.checkUpdate = function(_update,_object,_target){
 			"ry" : _object.ry,
 			"width" : _object.width,
 			"height" : _object.height,
+			"transform" : _object.transform,
 			"strokeWidth" : _object.strokeWidth,
 			"r" : _object.r
 		}
@@ -180,11 +175,13 @@ Mastermind.prototype.checkUpdate = function(_update,_object,_target){
 //---------------------------------------------------Board
 Mastermind.prototype.drawBoard = function(update){
 
-
 	//initialize board variables and define radius size
 	this.getBoardRadius();
 
 	//------------------Guess bar
+
+		console.log("bar position! --- >",this.hBar.x)
+		console.log("bar position! --- >",this.game.experiment.offset.x)
 
 		object={
 				"id" : "hintBar",
@@ -299,6 +296,11 @@ Mastermind.prototype.drawBoard = function(update){
 		for(var i=this.dificulty-1; i>=0; i--){
 			for(var j=0; j<2; j++){
 
+			if (j == 0){
+				color = "#CCBD1D"
+			}else{
+				color = "#A5A5A5" 	
+			}
 			this.checkUpdate(update,{
 
 					"id" : "hint-circle-"+j+"-"+i,
@@ -308,9 +310,9 @@ Mastermind.prototype.drawBoard = function(update){
 			 		"y" : this.gBar.height - this.gBar.hSpacing - this.radius - (i*(this.radius*2+2*this.gBar.hSpacing)),
 			 		"strokeWidth" : this.radius*0.15,
 			 		"r" : this.radius*0.8,
-			 		"opacity" : 0,
-			 		"fill" : "#E8E6E2",
-			 		"stroke" : "#E8E6E2",
+			 		"opacity" : 0.1,
+			 		"fill" : color,
+			 		"stroke" : color,
 
 			},"experiment")
 
@@ -320,12 +322,12 @@ Mastermind.prototype.drawBoard = function(update){
 				 "type" : "text",
 				 "x" : this.hBar.x + (j*this.hBar.width/2.6) + 2*this.radius,
 				 "y" : this.gBar.height - this.gBar.hSpacing - this.radius - (i*(this.radius*2+2*this.gBar.hSpacing)) + this.radius*0.3,
-				 "fill" : "#383431",
+				 "fill" : "#C1C0B2",
 				 "size" : this.radius*0.95,
-				 "text" : "",
+				 "text" : "0",
 				}
 
-			if(j==0){object.fill = "#F4EEA6"}else{object.fill = "#E2E2E2"}
+			if(j==0){object.fill = "#C1C0B2"}else{object.fill = "#C6C6C6"}
 
 			this.checkUpdate(update,object,"experiment")
 
@@ -649,52 +651,342 @@ Mastermind.prototype.setcheckButton = function(_ready,_data){
 }
 //----------------------------------------------------Tutorial
 
-Mastermind.prototype.tutorial = function(_update){
+Mastermind.prototype.displayNextTutorial = function(step){
+	this.tutorial(false,step)
+	this.game.customScreen.display()
+}
 
-	var fulldict = [1,2,3,4,5,6] 
+Mastermind.prototype.tutorial = function(_update,step){
 
-	//this.createLevel(4,3,fulldict,10,1)
+	console.log("---tutorial!",step)
 
-	console.log("tutorial")
+	this.game.customScreen.init()
 	this.game.customScreen.setOffset(0,this.game.menu.height)
 
 	this.custom = 'tutorial'
-	this.tutorialStep = 0
+	this.tutorialStep = step
 
-	// clickable
-	this.checkUpdate(_update,{
+	console.log(this.tutorialStep)
+	
+	if(!_update){
 
-		"id" : "overlay",
-		"type" : "rect",
-		"child" : "customScreen",
-		"x" : 0,
-		"y" : 0,
-		"width" : this.game.customScreen.width,
-		"height" : this.game.customScreen.height,
-		"fill" : "transparent",
-		"click" : function(){
-			
-			event.preventDefault()
-			mastermind.tutorialStep += 1
-			console.log("lkwjdk")
+		tooltip = document.createElement("p")
+		tooltip.style.position = "absolute"
+		tooltip.id = "tooltip-text"
+		tooltip.style.background = "#0E1D28"
+		tooltip.style.color = "#f0f0f0"
+		tooltip.style.fontFamily = "Roboto"
+		tooltip.style.fontWeight = "300"
+	
+		document.body.appendChild(tooltip);
+	}else{
+		tooltip.style.fontSize = this.radius*0.8
+	}
 
-		}
+	var toolTip = {}
+	toolTip.width = this.gBar.width+this.hBar.width+this.nBar.width-this.radius*2
+	toolTip.x = this.hBar.x+this.game.experiment.offset.x+this.game.experiment.scene.x+this.radius
 
-	},"customScreen")
-
+	tutoRadius = 1
+	tutoRadius = toolTip.width / (this.secretSize*(tutoRadius+tutoRadius/3)*2 + 2*(tutoRadius/3))
 
 	switch (this.tutorialStep){
 
-		case 1:
+
+		case 0://-----------------------------------------------------------------------------------------case - 0
+
+			this.checkUpdate(_update,{
+
+				"id" : "overlay-black",
+				"type" : "rect",
+				"child" : "customScreen",
+				"x" : 0,
+				"y" : 0,
+				"width" : this.game.customScreen.width,
+				"height" : this.game.customScreen.height,
+				"fill" : "#000000",
+				"opacity" : 0.5,
+				},"customScreen")
+
+
+			//-----------------------------------secret
+
+			object={
+				"id" : "tuto-secre-bg",
+				 "child" : "customScreen",
+				 "type" : "rect",
+				 "x" : toolTip.x,
+				 "y" : 0,
+				 "rx" : this.radius/2,
+				 "ry" : this.radius/2,
+				 "width" : toolTip.width,
+				 "height" : this.sBar.height,
+				 "fill" : "#C4C3C2"
+			}
+
+			this.checkUpdate(_update,object,"customScreen")
+
+
+			for(var i=0; i<this.secretSize; i++){
+
+				var id = this.logic.dictIds[i]
+
+				 object = {
+
+				 	"id" : "secret-"+id,
+				 	"child" : "customScreen",
+				 	"type" : "circle",
+				 	"x" : toolTip.x + this.radius*2 + i*(2*tutoRadius*1.3),
+				 	"y" : this.radius*1.85,
+				 	"r" : tutoRadius*0.9,
+				 	"fill": "#a4a3a2",
+				 	"stroke": "#828282",
+				 	"strokeWidth": this.radius*0.2,
+				}
+
+				this.checkUpdate(_update,object,"customScreen")
+
+				object = {
+
+				 	"id" : "secret-text-"+i,
+				 	"child" : "customScreen",
+				 	"type" : "text",
+				 	"x" : toolTip.x + this.radius*1.67 + i*(2*tutoRadius*1.3),
+				 	"y" : this.radius*2.3,
+				 	"text" : "?",
+		 			"align" : "center",
+		 			"fontWeight" : "500",
+		 			"size" : this.game.customScreen.height*0.045,
+				 	"fill": "#d8d6d2",
+				}
+
+				this.checkUpdate(_update,object,"customScreen")
+			}
+
+			//--------------------arrow
+
+			rotatex = toolTip.x+toolTip.width/2
+			rotatey = this.radius*4.3
+
+			this.checkUpdate(_update,{
+
+				"id" : "arrow",
+				"type" : "rect",
+				"child" : "customScreen",
+				"x" : rotatex,//this.radius*4.5,
+				"y" : rotatey,//toolTip.x+toolTip.width/2,
+				"width" : this.radius*1,
+				"height" : this.radius*1,
+				"fill" : "#0E1D28",
+				"transform" : "rotate(45," + rotatex +  "," + (rotatey + this.game.menu.height) + ")",
+			},"customScreen")
+
+
+			//--------------------------------overlay
+			this.checkUpdate(_update,{
+
+				"id" : "overlay",
+				"type" : "rect",
+				"child" : "customScreen",
+				"x" : 0,
+				"y" : 0,
+				"width" : this.game.customScreen.width,
+				"height" : this.game.customScreen.height,
+				"fill" : "transparent",
+				"click" : function(){
+
+						event.preventDefault()
+						mastermind.tutorialStep += 1
+						game.customScreen.pop()
+						console.log("lkwjdk")
+
+						console.log("removeing html")
+						var body = document.getElementById("body")
+						console.log(body)	
+
+						text = document.getElementById("tooltip-text")
+						console.log(text)
+						
+						if(text != undefined) body.removeChild(text)
+					
+						mastermind.displayNextTutorial(mastermind.tutorialStep)
+					
+					}
+				},"customScreen")
+
 			console.log("explain secret")
+
+			//----------------------------------------------------tooltip content
+
+			tooltip = document.getElementById("tooltip-text")
+			tooltip.textContent = "Break the secret code!"
+			tooltip.style.left =  toolTip.x + this.radius*2
+			tooltip.style.top =  this.radius * 7.6
+			tooltip.style.width =  toolTip.width-this.radius*6
+			tooltip.style.height = this.radius*1
+			tooltip.style.padding = this.radius*0.6
+			tooltip.style.textAlign = "center"
+
+			
+
+
 			break
 		
-		case 2:
+		case 1://-----------------------------------------------------------------------------------------case - 1
+
+			rotatex = toolTip.x+toolTip.width/2
+			rotatey = this.radius*24
+
+			this.checkUpdate(_update,{
+
+				"id" : "arrow",
+				"type" : "rect",
+				"child" : "customScreen",
+				"x" : rotatex,//this.radius*4.5,
+				"y" : rotatey,//toolTip.x+toolTip.width/2,
+				"width" : this.radius*1,
+				"height" : this.radius*1,
+				"fill" : "#0E1D28",
+				"transform" : "rotate(45," + rotatex +  "," + (rotatey + this.game.menu.height) + ")",
+			},"customScreen")
+
+			tooltip = document.getElementById("tooltip-text")
+			tooltip.textContent = "Tap colors to build a guess."
+			tooltip.style.left =  toolTip.x + this.radius*3
+			tooltip.style.top =  this.radius*25
+			tooltip.style.width =  toolTip.width-this.radius*7
+			tooltip.style.height = this.radius*1.5
+			tooltip.style.padding = this.radius*0.6
+			tooltip.style.textAlign = "center"
+
+			console.log("explain color input")
+
+			for(i=0; i<this.dictSize; i++){
+
+				var id = this.logic.dictIds[i]
+				this.game.experiment.updateSVGs({
+					"id" : "code-" + id,
+					"click" : function(){
+
+						event.preventDefault()
+						mastermind.tutorialStep += 1
+				 		game.customScreen.pop()
+
+				 		var newR = this.getAttribute("r")*0.85
+				 		var radius = this.getAttribute("r")
+
+				 		attrs = [this.getAttribute("fill"), this.getAttribute("stroke"), this.getAttribute("r")]
+				 		value = this.getAttribute("data-value")
+						mastermind.logic.selectValue(attrs,value)
+						
+						var body = document.getElementById("body")
+						console.log(body)	
+
+						text = document.getElementById("tooltip-text")
+						console.log(text)
+						
+						if(text != undefined) body.removeChild(text)
+
+						mastermind.displayNextTutorial(mastermind.tutorialStep)
+					}
+				})
+
+
+			}
+
 			console.log("explain color input")
 			break
 		
+		case 2://-----------------------------------------------------------------------------------------case - 2
+
+			for(i=0; i<this.dictSize; i++){
+
+				var id = this.logic.dictIds[i]
+
+				this.game.experiment.updateSVGs({
+					"id" : "code-" + id,
+					"click" : function(){
+						event.preventDefault()
+				 		var newR = this.getAttribute("r")*0.85
+				 		var radius = this.getAttribute("r")
+
+				 		attrs = [this.getAttribute("fill"), this.getAttribute("stroke"), this.getAttribute("r")]
+				 		value = this.getAttribute("data-value")
+						mastermind.logic.selectValue(attrs,value)
+					}
+				})
+			
+			}
+			
+			console.log("explain feedback")
+			mastermind.tutorialStep += 1
+			break
+		
 		case 3:
-			console.log("explain secre")
+
+			rotatex = toolTip.x+this.radius*2
+			rotatey = this.radius*21.5
+
+			this.checkUpdate(_update,{
+
+				"id" : "arrow",
+				"type" : "rect",
+				"child" : "customScreen",
+				"x" : rotatex,//this.radius*4.5,
+				"y" : rotatey,//toolTip.x+toolTip.width/2,
+				"width" : this.radius*1,
+				"height" : this.radius*1,
+				"fill" : "#0E1D28",
+				"transform" : "rotate(45," + rotatex +  "," + (rotatey + this.game.menu.height) + ")",
+			},"customScreen")
+
+			tooltip = document.getElementById("tooltip-text")
+			tooltip.innerHTML = 'GOLD: Colors and slots you got perfect <br><br> <b>SILVER:</b> Colors you got right, but in wrong place'
+			tooltip.style.left =  toolTip.x - this.radius * 3
+			tooltip.style.top =  this.radius*20
+			tooltip.style.width =  toolTip.width-this.radius*6
+			tooltip.style.height = this.radius*4.2
+			tooltip.style.padding = this.radius*0.5
+			tooltip.style.textAlign = "center"
+
+
+			for(i=0; i<this.dictSize; i++){
+
+				var id = this.logic.dictIds[i]
+				
+				this.game.experiment.updateSVGs({
+					"id" : "code-" + id,
+					"click" : function(){
+
+						event.preventDefault()
+						mastermind.tutorialStep += 1
+				 		game.customScreen.pop()
+
+				 		var newR = this.getAttribute("r")*0.85
+				 		var radius = this.getAttribute("r")
+
+				 		attrs = [this.getAttribute("fill"), this.getAttribute("stroke"), this.getAttribute("r")]
+				 		value = this.getAttribute("data-value")
+						mastermind.logic.selectValue(attrs,value)
+						
+						var body = document.getElementById("body")
+						console.log(body)	
+
+						text = document.getElementById("tooltip-text")
+						console.log(text)
+						
+						if(text != undefined) body.removeChild(text)
+
+						mastermind.displayNextTutorial(mastermind.tutorialStep)
+						mastermind.displayTutorial = true
+
+					}
+				})
+
+			}
+
+
+
 			break
 
 	}
@@ -702,6 +994,10 @@ Mastermind.prototype.tutorial = function(_update){
 
 //----------------------------------------------------Level selector
 Mastermind.prototype.levelSelector = function(update){
+
+	var path = "https://psymastermind.firebaseio.com/users/" + this.game.uid + "/gameCount"
+	var ref = new Firebase(path);
+	ref.off("value");
 
 	this.custom = "levelSelector"
 
@@ -805,8 +1101,8 @@ Mastermind.prototype.levelSelector = function(update){
 		 	mastermind.createLevel(5,6,dictionary,10,1)
 
 		 }
-
 	}
+
 	this.checkUpdate(update,buttonText,"customScreen")
 
 
@@ -1285,6 +1581,7 @@ Mastermind.prototype.loginPage = function(update){
 		svgContainer = document.getElementById("conteiner")
 
 		document.body.insertBefore(div, svgContainer);
+
 	}
 
 	emailBox = document.getElementById("emailbox")
@@ -1690,6 +1987,9 @@ Mastermind.prototype.loginPage = function(update){
 
 	logic.prototype.checkGuess = function(_row){
 
+		if(this.mastermind.displayTutorial){
+			mastermind.displayNextTutorial(mastermind.tutorialStep)
+		}
 
 		var path = "guesses/game_" + this.mastermind.gameCount + "/" + _row
 
@@ -1724,6 +2024,7 @@ Mastermind.prototype.loginPage = function(update){
 					"id" : "hint-" + 0 + "-" + _row,
 					"type" : "text",
 					"child" : "experiment",
+					"fill" : "#8C7F04",
 					"text" : hint.correctPosition,
 
 				})
@@ -1855,7 +2156,6 @@ Mastermind.prototype.loginPage = function(update){
  		d = new Date();
 		second = d.getTime()
 		return second
-
 	}
 
 	function checkPrivate(){
@@ -1891,10 +2191,13 @@ Mastermind.prototype.loginPage = function(update){
 		if(authData){
 			game.setUserId(authData.uid)
 			game.customScreen.pop()
-			var body = document.getElementById("body")
+
+			// remove html
+			var body = document.getElementById("body")			
 			aouth = document.getElementById("aouth")
 			if(aouth != undefined) body.removeChild(aouth)
-			console.log("outh data ")
+			
+			console.log("outh data")
 			mastermind.gameStart()
 
 

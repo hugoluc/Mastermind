@@ -75,7 +75,8 @@ Game.prototype.login = function(email,password,callback){
 
 Game.prototype.logData = function(_path,_data){
 
-	fireBase.child("users/" + this.uid + "/" + _path).set(_data);	
+	fireBase.child("users/" + this.uid + "/" + _path).set(_data);
+
 }
 
 Game.prototype.pushData = function(_path,_data){
@@ -189,7 +190,7 @@ Game.prototype.register = function(email,password){
 
 		this.container.append(description.type).attr("id", description.id)		
 		description = this.adjustPosition(description)
-		this.SVG[description.id] = description 
+		this.SVG[description.id] = description 	
 	}
 
 	Area.prototype.updateSVGs = function(_description){ 
@@ -244,11 +245,16 @@ Game.prototype.register = function(email,password){
 			}
 
 
+			if(description.id == "overlay"){
+				console.log("44")
+			}
+
 			svg.attr("fill",description.fill)
 				.attr("stroke", description.stroke)
 				.attr("stroke-width", description.strokeWidth)
 				.attr("data-value", description.dataValue)
 				.attr("opacity", description.opacity)
+				.attr("transform", description.transform)
 
 				.on("touchstart", description.click)
 				.on("click", description.click)
@@ -337,6 +343,7 @@ function winScreen(container){
  	this.container = container
   	this.bgwidth = window.innerWidth
 	this.bgheight = window.innerHeight - (window.innerHeight*0.08)
+	this.identifyer = "winScreen"
 }
 
 winScreen.prototype = new Area(this.container);
@@ -490,6 +497,9 @@ function headerMenu(container){
 				game.experiment.pop()
 				mastermind.gameStart()			
 			}	
+			if(game.customScreen.getStatus()){
+				game.customScreen.pop()
+			}
 		}
 	})
 
@@ -536,6 +546,7 @@ function headerMenu(container){
  	this.container = container
  	this.header = header
  	this.init()
+ 	this.identifyer = "customScreen"
  }
 
  customScreen.prototype = new Area(this.container);
