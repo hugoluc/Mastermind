@@ -1175,12 +1175,6 @@ Mastermind.prototype.levelSelector = function(update){
 
 Mastermind.prototype.displayWinScreen = function(_score){
 
-<<<<<<< HEAD
-	console.log("--------------> 01", _score)
-
-=======
-	console.log("------------", _score)
->>>>>>> c7e8d76bebea80dcc4e8b2c2c0422524300bab01
 	this.drawWinScreen(_score,false)
 	this.game.winScreen.display()
 }
@@ -1355,12 +1349,6 @@ Mastermind.prototype.drawWinScreen = function(_score,update){
 		 "fontWeight" : "normal",
 		 "fill" : "#CCBD1D",
 	},"winScreen")
-
-<<<<<<< HEAD
-	console.log("--------------------->", _score)
-=======
-	console.log(_score)
->>>>>>> c7e8d76bebea80dcc4e8b2c2c0422524300bab01
 
 	this.checkUpdate(update,{
 		"id" : "winScreen-score-number",
