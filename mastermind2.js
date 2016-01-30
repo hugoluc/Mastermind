@@ -189,6 +189,8 @@ Mastermind.prototype.setMenuButtons = function(){
 			fireBase.unauth();
 		},
 	})
+
+
 }
 
 //---------------------------------------------------Board
@@ -1813,8 +1815,6 @@ Mastermind.prototype.loginPage = function(update){
 
 	logic.prototype.setGuessTarget = function(_col,_row){
 
-		console.log("0")
-
 		if(_col === true){
 
 			this.lastTarget.row = this.guessTarget.row
@@ -1841,7 +1841,6 @@ Mastermind.prototype.loginPage = function(update){
 			}
 
 		}else{
-			console.log("saving last")
 			this.lastTarget.row = this.guessTarget.row
 			this.lastTarget.column = this.guessTarget.column
 		}
@@ -1876,34 +1875,19 @@ Mastermind.prototype.loginPage = function(update){
 
 		} else{
 
-			console.log("1")
-
 			this.guessTarget.column = 0
 			this.guessTarget.row = Math.floor(this.valuesSelected/this.secretSize)
 
 		}
 
-
-
 		if (this.guess[_col] != undefined) {
-			console.log("2")
+
+
+			this.mastermind.setcheckButton(false)
 
 		 	this.guess[_col] = undefined
 		 	this.valuesSelected--
-			
-			var empty = true
 
-			for(var i=0; i<this.secretSize;i++){
-				console.log(this.guess[i])
-				if(this.guess[i] != undefined){
-					empty = false
-				}
-			}
-
-			if(empty){
-				console.log("empty!")
-				this.mastermind.setcheckButton(false)
-			}
 
 		 }
 
@@ -1997,15 +1981,11 @@ Mastermind.prototype.loginPage = function(update){
 			//-------------------------------------------------------------------
 			this.guess[this.guessTarget.column] = {"value":_pegValue,"checked":false}
 
-			if(this.guess.length > 0){
-				
-				this.mastermind.setcheckButton(true,row)
-
-			}
 
 				if(this.checkGuessFinished()){
 
 					this.setGuessTarget(_final=true)
+					this.mastermind.setcheckButton(true,row)
 
 				}else{
 
@@ -2030,42 +2010,7 @@ Mastermind.prototype.loginPage = function(update){
 		return true
 	}
 
-	logic.prototype.setUnselected = function(position){
-		
-		game.experiment.updateSVGs({
-
-				"id" : this.guessTarget.row + "-" + position,
-				"fill" :  "#C4C3C2",
-				"stroke" : "#C4C3C2",
-				"strokeWidth": this.radius*0.15,
-				"r" : this.radius*0.9
-
-			})
-
-	}
-
 	logic.prototype.checkGuess = function(_row){
-
-		var secret = this.getSecret()
-
-		var hint = {
-			"correctPosition" : 0,
-			"correctValue" : 0,
-		}
-
-		if(!this.checkGuessFinished()){
-
-			for(var i=0; i<this.secretSize; i++){
-
-				if(this.guess[i] === undefined){
-					this.setUnselected(i)
-					this.guess[i] = {"value":0,"checked":false}
-					this.valuesSelected++
-				}
-
-			}
-
-		}
 
 		if(this.mastermind.displayTutorial){
 			mastermind.displayNextTutorial(mastermind.tutorialStep)
@@ -2074,14 +2019,20 @@ Mastermind.prototype.loginPage = function(update){
 		var path = "guesses/game_" + this.mastermind.gameCount + "/" + _row
 
 		newGuess = []
-		
 		for (var i=0; i<this.guess.length; i++){
 			newGuess.push(this.guess[i].value)
 		}
 
 		mastermind.data.guesses.push(newGuess)
 		//this.game.logData(path,data)
-		
+
+		var secret = this.getSecret()
+
+		var hint = {
+			"correctPosition" : 0,
+			"correctValue" : 0,
+		}
+
 		if(this.checkGuessFinished()){
 
 			hint.correctPosition = this.getCorrectPositions(secret)
@@ -2170,7 +2121,6 @@ Mastermind.prototype.loginPage = function(update){
 		}
 
 		this.guess = []
-		console.log("setting next target")
 		this.setGuessTarget()
 		this.guessesMade++
 		this.mastermind.setcheckButton(false)

@@ -18,7 +18,11 @@ function Game(playerName){
 	this.menu = new headerMenu(this.Container,this.headerHeigth);
 	this.experiment = new experiment(this.Container,this.headerHeigth);
 
+	this.evt = document.createEvent("Event");
+	this.evt.initEvent("userRegisterStatus",true,true);
+
 	this.menu.display()
+
 }
 
 Game.prototype.setUserId = function(_id){
@@ -73,14 +77,15 @@ Game.prototype.login = function(email,password,callback){
 }
 
 Game.prototype.logData = function(_path,_data){
-
-	fireBase.child("users/" + this.uid + "/" + _path).set(_data);
-
+	
+	fireBase.child("users/" + this.uid + "/" + _path).set(_data);	
 }
 
-Game.prototype.pushData = function(_path,_data){
+Game.prototype.registerStatus = function(_status){
+	
+	this.evt.uStatus = _status
+	document.dispatchEvent(this.evt);
 
-	fireBase.child("users/" + this.uid + "/" + _path).push(_data);		
 }
 
 Game.prototype.register = function(email,password){
@@ -96,8 +101,10 @@ Game.prototype.register = function(email,password){
 			// argument 2
 			function(error, userData) {
 			  if (error) {
+			  	game.registerStatus(false)
 			    console.log("Error creating user:", error);
 			  } else {
+			  	game.registerStatus(true)
 			    console.log("Successfully created user account with uid:", userData.uid);
 			 }
 	});
@@ -116,6 +123,7 @@ Game.prototype.register = function(email,password){
 	 	}
 	 	this.active = false;
 	 	this.init()
+
 	}
 
 	Area.prototype.getStatus = function(){
@@ -124,7 +132,6 @@ Game.prototype.register = function(email,password){
 
 
 	Area.prototype.adjustPosition = function(_description) {
-
 
 		if(_description.child != undefined){
 
@@ -139,14 +146,12 @@ Game.prototype.register = function(email,password){
 			
 			} else if(_description.child == "dashboard"){
 
-
 				if(_description.x != undefined) _description.x = _description.x + this.widgets[_description.dashboardId-1].x + this.offset.x
 				if(_description.y != undefined)_description.y = _description.y + this.widgets[_description.dashboardId-1].y + this.offset.y
 				if(_description.x1 != undefined)_description.x1 = _description.x1 + this.scene.x + this.offset.x
 				if(_description.y2 != undefined)_description.y1 = _description.y1 + this.scene.y + this.offset.y
 				if(_description.x1 != undefined)_description.x2 = _description.x2 + this.scene.x + this.offset.x
 				if(_description.y2 != undefined)_description.y2 = _description.y2 + this.scene.y + this.offset.y
-
 
 			}else{
 
@@ -156,11 +161,8 @@ Game.prototype.register = function(email,password){
 				if(_description.y1 != undefined) _description.y1 = _description.y1 + this.y + this.offset.y
 				if(_description.x2 != undefined) _description.x2 = _description.x2 + this.x + this.offset.x
 				if(_description.y2 != undefined) _description.y2 = _description.y2 + this.y + this.offset.y
-
 			}
-
 		}
-
 		// adsjust x and y based on child
 		return _description
 	}
@@ -169,6 +171,7 @@ Game.prototype.register = function(email,password){
 
 		if(_x != undefined) {this.offset.x = _x}
 		if(_y != undefined) {this.offset.y = _y}
+
 	}
 
 	Area.prototype.display = function() {
@@ -188,7 +191,8 @@ Game.prototype.register = function(email,password){
 
 		this.container.append(description.type).attr("id", description.id)		
 		description = this.adjustPosition(description)
-		this.SVG[description.id] = description 	
+		this.SVG[description.id] = description 
+
 	}
 
 	Area.prototype.updateSVGs = function(_description){ 
@@ -243,16 +247,11 @@ Game.prototype.register = function(email,password){
 			}
 
 
-			if(description.id == "overlay"){
-				console.log("44")
-			}
-
 			svg.attr("fill",description.fill)
 				.attr("stroke", description.stroke)
 				.attr("stroke-width", description.strokeWidth)
 				.attr("data-value", description.dataValue)
 				.attr("opacity", description.opacity)
-				.attr("transform", description.transform)
 
 				.on("touchstart", description.click)
 				.on("click", description.click)
@@ -341,7 +340,6 @@ function winScreen(container){
  	this.container = container
   	this.bgwidth = window.innerWidth
 	this.bgheight = window.innerHeight - (window.innerHeight*0.08)
-	this.identifyer = "winScreen"
 }
 
 winScreen.prototype = new Area(this.container);
@@ -418,8 +416,7 @@ winScreen.prototype.display = function(){
 }
 
 //---------------------------------menu
-
-function headerMenu(container){
+ function headerMenu(container){
  	this.container = container
   	this.width = window.innerWidth
 	this.height = window.innerHeight*0.08
@@ -495,9 +492,6 @@ function headerMenu(container){
 				game.experiment.pop()
 				mastermind.gameStart()			
 			}	
-			if(game.customScreen.getStatus()){
-				game.customScreen.pop()
-			}
 		}
 	})
 
@@ -511,17 +505,40 @@ function headerMenu(container){
 		"size" : this.height*0.3,
  		"x" : this.width - this.width*0.01,
 		"y" : this.height/2,
+		"click" : function(){
+
+			if(game.experiment.getStatus()){
+			
+				console.log("winscreen: ", game.winScreen.getStatus())
+				console.log("looseScreen: ", game.winScreen.getStatus())
+
+				if(game.winScreen.getStatus()){
+					
+					console.log("----------winscreenpop----------")
+					game.winScreen.pop()
+				}
+				if(game.looseScreen.getStatus()){
+					
+					console.log("----------winscreenpop----------")
+					game.looseScreen.pop()
+
+				}
+				game.experiment.pop()
+			}	
+		
+		fireBase.unauth();
+
+		}
 	})
+
 }
 
 
 //---------------------------------customScreen
- 
  function customScreen(container,header){
  	this.container = container
  	this.header = header
  	this.init()
- 	this.identifyer = "customScreen"
  }
 
  customScreen.prototype = new Area(this.container);
