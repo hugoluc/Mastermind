@@ -977,7 +977,7 @@ Mastermind.prototype.tutorial = function(_update,step){
 						
 						if(text != undefined) body.removeChild(text)
 
-						mastermind.displayNextTutorial(mastermind.tutorialStep)
+						//mastermind.displayNextTutorial(mastermind.tutorialStep)
 						mastermind.displayTutorial = true
 
 					}
@@ -1156,6 +1156,7 @@ Mastermind.prototype.levelSelector = function(update){
 
 Mastermind.prototype.displayWinScreen = function(_score){
 
+	console.log("------------", _score)
 	this.drawWinScreen(_score,false)
 	this.game.winScreen.display()
 }
@@ -1331,6 +1332,8 @@ Mastermind.prototype.drawWinScreen = function(_score,update){
 		 "fill" : "#CCBD1D",
 	},"winScreen")
 
+	console.log(_score)
+
 	this.checkUpdate(update,{
 		"id" : "winScreen-score-number",
 		 "child" : "winScreen",
@@ -1338,7 +1341,7 @@ Mastermind.prototype.drawWinScreen = function(_score,update){
 		 "size" : this.radius*18 + "%",
 		 "x" : this.game.winScreen.width/2,
 		 "y" : this.radius*8,
-		 "text" : _score,
+		 "text" : "adsr",
 		 "fontWeight" : "bold",
 		 "fill" : "#CCBD1D",
 	},"winScreen")
@@ -2068,7 +2071,7 @@ Mastermind.prototype.loginPage = function(update){
 
 			var gameScore = (10-this.guessesMade)*(this.secretSize+this.dictSize)*10
 			this.mastermind.score += gameScore;
-			this.mastermind.displayWinScreen(gameScore)
+			this.mastermind.displayWinScreen(gameScore,true)
 
 			console.log("youwin!");
 			var path = "games/" + this.mastermind.gameCount
@@ -2090,7 +2093,7 @@ Mastermind.prototype.loginPage = function(update){
 			mastermind.data.NguessesMade = this.guessesMade
 			game.pushData(path, mastermind.data)
 
-			this.mastermind.displayLooseScreen()
+			this.mastermind.displayLooseScreen(gameScore)
 			console.log("lost--data written:");
 			console.log(mastermind.data);
 			return
