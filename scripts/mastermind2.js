@@ -28,7 +28,6 @@ Mastermind.prototype.getGameCount = function(){
 
 	function set_Data(data){
 		
-		console.log("setting game count:")
 		mastermind.setData(data.val())		
 		mastermind.levelSelector()
 		mastermind.game.customScreen.display()
@@ -39,7 +38,6 @@ Mastermind.prototype.getGameCount = function(){
 		console.log(err.code)
 	}
 
-	console.log(this.game.uid)
 	var path = "https://psymastermind.firebaseio.com/users/" + this.game.uid + "/gameCount"
 	var ref = new Firebase(path);
 	ref.on("value", set_Data,handleError);
@@ -48,7 +46,6 @@ Mastermind.prototype.getGameCount = function(){
 Mastermind.prototype.setData = function(_data){
 
 		this.gameCount = _data
-		console.log(this.gameCount)
 }
 
 Mastermind.prototype.createLevel = function(_secretSize,_dictSize,_fullDictonary,_dificulty,_secretContructor){
@@ -91,7 +88,6 @@ Mastermind.prototype.init = function(){
 }
 
 Mastermind.prototype.gameStart = function(){
-	console.log("stating the game")
 	this.setMenuButtons()
 	this.getGameCount()
 }
@@ -139,6 +135,9 @@ Mastermind.prototype.update = function(){
 			case "tutorial":
 				//this.tutorial(true,this.tutorialStep)
 				break
+			case "customLevel":
+				this.drawCustomSelector(true)
+				break 
 		}
 	}
 }
@@ -178,8 +177,6 @@ Mastermind.prototype.checkUpdate = function(_update,_object,_target){
 //-----------------------------------------------------header
 
 Mastermind.prototype.setMenuButtons = function(){
-
-	console.log("logout button setting up")
 
 	this.game.menu.updateSVGs({
 		"id" : "logout",
@@ -675,15 +672,12 @@ Mastermind.prototype.displayNextTutorial = function(step){
 
 Mastermind.prototype.tutorial = function(_update,step){
 
-	console.log("---tutorial!",step)
-
 	this.game.customScreen.init()
 	this.game.customScreen.setOffset(0,this.game.menu.height)
 
 	this.custom = 'tutorial'
 	this.tutorialStep = step
 
-	console.log(this.tutorialStep)
 	
 	if(!_update){
 
@@ -817,12 +811,9 @@ Mastermind.prototype.tutorial = function(_update,step){
 						mastermind.tutorialStep += 1
 						game.customScreen.pop()
 
-						console.log("removeing html")
 						var body = document.getElementById("body")
-						console.log(body)	
 
 						text = document.getElementById("tooltip-text")
-						console.log(text)
 						
 						if(text != undefined) body.removeChild(text)
 					
@@ -831,7 +822,6 @@ Mastermind.prototype.tutorial = function(_update,step){
 					}
 				},"customScreen")
 
-			console.log("explain secret")
 
 			//----------------------------------------------------tooltip content
 
@@ -876,7 +866,6 @@ Mastermind.prototype.tutorial = function(_update,step){
 			tooltip.style.padding = this.radius*0.6
 			tooltip.style.textAlign = "center"
 
-			console.log("explain color input")
 
 			for(i=0; i<this.dictSize; i++){
 
@@ -897,10 +886,8 @@ Mastermind.prototype.tutorial = function(_update,step){
 						mastermind.logic.selectValue(attrs,value)
 						
 						var body = document.getElementById("body")
-						console.log(body)	
 
 						text = document.getElementById("tooltip-text")
-						console.log(text)
 						
 						if(text != undefined) body.removeChild(text)
 
@@ -911,7 +898,6 @@ Mastermind.prototype.tutorial = function(_update,step){
 
 			}
 
-			console.log("explain color input")
 			break
 		
 		case 2://-----------------------------------------------------------------------------------------case - 2
@@ -935,7 +921,6 @@ Mastermind.prototype.tutorial = function(_update,step){
 			
 			}
 			
-			console.log("explain feedback")
 			mastermind.tutorialStep += 1
 			break
 		
@@ -987,10 +972,8 @@ Mastermind.prototype.tutorial = function(_update,step){
 						mastermind.logic.selectValue(attrs,value)
 						
 						var body = document.getElementById("body")
-						console.log(body)	
 
 						text = document.getElementById("tooltip-text")
-						console.log(text)
 						
 						if(text != undefined) body.removeChild(text)
 
@@ -1028,7 +1011,7 @@ Mastermind.prototype.levelSelector = function(update){
 	//create custom screen
 	button.x = this.game.customScreen.width/2 - button.width/2
 
-	//-------------------------------------------------------------------------------------------------------------normal
+	//-------------------------------------------------------------------------------------------------------------easy
 
 	button = {
 
@@ -1048,8 +1031,7 @@ Mastermind.prototype.levelSelector = function(update){
 		 	game.customScreen.pop()
 
 			var dictionary = [1,2,3,4,5,6,7,8]
-		 	mastermind.createLevel(3,4,dictionary,10,1)
-
+		 	mastermind.createLevel(config.levelConfig.easy.secretSize,config.levelConfig.easy.colors,dictionary,config.levelConfig.easy.dificulty,1)
 		 }
 	}
 
@@ -1071,7 +1053,7 @@ Mastermind.prototype.levelSelector = function(update){
 		 	game.customScreen.pop()
 
 			var dictionary = [1,2,3,4,5,6,7,8]
-		 	mastermind.createLevel(3,4,dictionary,10,1)
+		 	mastermind.createLevel(config.levelConfig.easy.secretSize,config.levelConfig.easy.colors,dictionary,config.levelConfig.easy.dificulty,1)
 
 		 }
 	}
@@ -1093,11 +1075,10 @@ Mastermind.prototype.levelSelector = function(update){
 		 "click" : function(){
 
 			event.preventDefault()
-		 	console.log(this)
 		 	game.customScreen.pop()
 
 			var dictionary = [1,2,3,4,5,6,7,8]
-		 	mastermind.createLevel(4,5,dictionary,10,1)
+		 	mastermind.createLevel(config.levelConfig.normal.secretSize,config.levelConfig.normal.colors,dictionary,config.levelConfig.normal.dificulty,1)
 
 		 }
 	}
@@ -1117,7 +1098,7 @@ Mastermind.prototype.levelSelector = function(update){
 		 	event.preventDefault()
 		 	game.customScreen.pop()
 			var dictionary = [1,2,3,4,5,6,7,8]
-		 	mastermind.createLevel(5,6,dictionary,10,1)
+		 	mastermind.createLevel(config.levelConfig.normal.secretSize,config.levelConfig.normal.colors,dictionary,config.levelConfig.normal.dificulty,1)
 
 		 }
 	}
@@ -1142,7 +1123,7 @@ Mastermind.prototype.levelSelector = function(update){
 		 	game.customScreen.pop()
 
 			var dictionary = [1,2,3,4,5,6,7,8]
-		 	mastermind.createLevel(5,7,dictionary,10,1)
+		 	mastermind.createLevel(config.levelConfig.hard.secretSize,config.levelConfig.hard.colors,dictionary,config.levelConfig.hard.dificulty,1)
 
 		 }
 	}
@@ -1163,12 +1144,166 @@ Mastermind.prototype.levelSelector = function(update){
 		 	event.preventDefault()
 		 	game.customScreen.pop()
 			var dictionary = [1,2,3,4,5,6,7,8]
-		 	mastermind.createLevel(5,7,dictionary,10,1)
+		 	mastermind.createLevel(config.levelConfig.hard.secretSize,config.levelConfig.hard.colors,dictionary,config.levelConfig.hard.dificulty,1)
 
 		 }
-
 	}
 	this.checkUpdate(update,buttonText,"customScreen")
+
+	//-----------------------------------------------------------------------------------------------------------------------custom
+
+
+	if(config.levelConfig.custom.display){
+
+
+		button = {
+
+			"id" : "custom",
+			 "type" : "rect",
+			 "x" :  this.game.customScreen.width*0.5 - button.width/2,
+			 "y" : this.game.customScreen.height*0.75,
+			 "rx" : this.game.customScreen.height*0.01,
+			 "ry" : this.game.customScreen.height*0.01,
+			 "width" : button.width,
+			 "height" : button.height,
+			 "fill" : "#F2CE5A",
+			 "click" : function(){
+			 	mastermind.displayCustomSelector
+
+			 }
+		}
+
+		this.checkUpdate(update,button,"customScreen")
+
+		buttonText = {
+			"id" : "customText",
+			 "type" : "text",
+			 "x" : this.game.customScreen.width*0.5 - button.width*0.33,
+			 "y" : this.game.customScreen.height*0.6 + this.game.customScreen.height*0.215,
+			 "fill" : "#A58E2F",
+			 "text" : "Custom",
+			 "align" : "left",
+			 "fontWeight" : "400",
+			 "size" : this.game.customScreen.height*0.05,
+			 "click" : function(){
+			 	mastermind.displayCustomSelector()
+			 	//mastermind.createLevel(config.levelConfig.custom.secretSize,config.levelConfig.custom.colors,dictionary,config.levelConfig.custom.dificulty,1)
+
+			 }
+		}
+		this.checkUpdate(update,buttonText,"customScreen")	
+	}	
+}
+
+Mastermind.prototype.displayCustomSelector = function(){
+
+	this.game.customScreen.pop()	
+	this.custom = "customLevel"
+	this.drawCustomSelector(false)
+	this.game.customScreen.display()
+}
+
+Mastermind.prototype.drawCustomSelector = function(update){
+
+	var controller = function(target){
+
+		var offset = 0
+		var controllerArea = { "height" : game.customScreen.height*0.45 }
+		var controlerRadius = controllerArea.height*0.1
+		var spacing = controlerRadius
+		controllerArea.width = (controlerRadius * 6) + (spacing*2) 
+
+
+
+
+		if(target == "color"){
+			offset = controllerArea.height
+		}
+
+		var circlePosition = {
+			"y" : controllerArea.width*0.5,
+			"x" : ((game.customScreen.width - controllerArea.width)/2)+controlerRadius,
+		}
+
+		console.log(circlePosition)
+
+		//--------------------------------LINE
+		mastermind.checkUpdate(update,{
+
+			"id" : "circle-line-"+target,
+			"child" : "customScreen",
+			"type" : "line",
+			"x1" : 0,
+			"x2" : game.customScreen.width,
+			"y1" : controllerArea.height+offset,
+			"y2" : controllerArea.height+offset,
+			"fill" : "#193749",
+		},"customScreen")
+
+		//-------------------------------CIRCLES
+		mastermind.checkUpdate(update,{
+
+			"id" : "circle-count-"+target,
+			"child" : "customScreen",
+			"type" : "circle",
+			"x" : circlePosition.x,
+			"y" : circlePosition.y+offset,
+			"strokeWidth" : this.radius*0.15,
+	 		"r" : controllerArea.height*0.1,
+	 		"fill" : "#E8E6E4",
+	 		"stroke" : "#E8E6E2",
+	 		"click" : function(){
+
+	 			console.log("yes")
+
+	 		}
+
+		},"customScreen")
+
+		mastermind.checkUpdate(update,{
+
+			"id" : "circle-add-"+target,
+			"child" : "customScreen",
+			"type" : "circle",
+			"x" : circlePosition.x + spacing + controlerRadius*2,
+			"y" : circlePosition.y+offset,
+			"strokeWidth" : this.radius*0.5,
+	 		"r" : controllerArea.height*0.1,
+	 		"fill" : "#E8E6E4",
+	 		"stroke" : "#E8E6E2",
+	 		"click" : function(){
+
+	 			console.log("yes")
+
+	 		}
+
+		},"customScreen")
+
+		mastermind.checkUpdate(update,{
+
+			"id" : "circle-remove-"+target,
+			"child" : "customScreen",
+			"type" : "circle",
+			"x" : circlePosition.x + (spacing*2) + (controlerRadius*4),
+			"y" : circlePosition.y + offset,
+			"strokeWidth" : this.radius*0.5,
+	 		"r" : controllerArea.height*0.1,
+	 		"fill" : "#E8E6E4",
+	 		"stroke" : "#E8E6E2",
+	 		"click" : function(){
+
+	 			console.log("yes")
+
+	 		}
+
+		},"customScreen")
+
+	}
+
+
+	controller("color")
+	console.log("*")
+	controller("holes")
 }
 
 //----------------------------------------------------Win Screen
@@ -1216,11 +1351,8 @@ Mastermind.prototype.drawWinScreen = function(_score,update){
 		 "fill" : "#193749",
 		 "click" : function(){
 			event.preventDefault()
-		 	console.log("win")
 		 	game.winScreen.pop()
-		 	console.log("experiment")
 		 	game.experiment.pop()
-		 	console.log("init")
 		 	mastermind.gameStart()
 
 		 }
@@ -1239,11 +1371,10 @@ Mastermind.prototype.drawWinScreen = function(_score,update){
 		 "fill" : "#6D9BB2",
 		 "click" : function(){
 			event.preventDefault()
-		 	console.log("win")
+
 		 	game.winScreen.pop()
-		 	console.log("experiment")
+
 		 	game.experiment.pop()
-		 	console.log("init")
 		 	mastermind.gameStart()
 
 		 }
@@ -1263,10 +1394,7 @@ Mastermind.prototype.drawWinScreen = function(_score,update){
 		 "fill" : "#90BA3E",
 		 "click" : function(){
 			event.preventDefault()
-		 	console.log("--------------")
-		 	console.log("win")
 		 	game.winScreen.pop()
-		 	console.log("experiment")
 		 	game.experiment.pop()
 
 		 	var dictionary = [1,2,3,4,5,6,7,8]
@@ -1288,10 +1416,7 @@ Mastermind.prototype.drawWinScreen = function(_score,update){
 		 "fill" : "#365B19",
 		 "click" : function(){
 			event.preventDefault()
-		 	console.log("--------------")
-		 	console.log("win")
 		 	game.winScreen.pop()
-		 	console.log("experiment")
 		 	game.experiment.pop()
 
 		 	var dictionary = [1,2,3,4,5,6,7,8]
@@ -1357,7 +1482,7 @@ Mastermind.prototype.drawWinScreen = function(_score,update){
 		 "size" : this.radius*18 + "%",
 		 "x" : this.game.winScreen.width/2,
 		 "y" : this.radius*8,
-		 "text" : "adsr",
+		 "text" : _score,
 		 "fontWeight" : "bold",
 		 "fill" : "#CCBD1D",
 	},"winScreen")
@@ -1408,11 +1533,8 @@ Mastermind.prototype.drawLooseScreen = function(update){
 		 "fill" : "#193749",
 		 "click" : function(){
 			event.preventDefault()
-		 	console.log("win")
 		 	game.winScreen.pop()
-		 	console.log("experiment")
 		 	game.experiment.pop()
-		 	console.log("init")
 		 	mastermind.gameStart()
 
 		 }
@@ -1431,11 +1553,8 @@ Mastermind.prototype.drawLooseScreen = function(update){
 		 "fill" : "#6D9BB2",
 		 "click" : function(){
 			event.preventDefault()
-		 	console.log("win")
 		 	game.winScreen.pop()
-		 	console.log("experiment")
 		 	game.experiment.pop()
-		 	console.log("init")
 		 	mastermind.gameStart()
 
 		 }
@@ -1455,10 +1574,7 @@ Mastermind.prototype.drawLooseScreen = function(update){
 		 "fill" : "#90BA3E",
 		 "click" : function(){
 			event.preventDefault()
-		 	console.log("--------------")
-		 	console.log("win")
 		 	game.winScreen.pop()
-		 	console.log("experiment")
 		 	game.experiment.pop()
 
 		 	var dictionary = [1,2,3,4,5,6,7,8]
@@ -1480,10 +1596,7 @@ Mastermind.prototype.drawLooseScreen = function(update){
 		 "fill" : "#365B19",
 		 "click" : function(){
 			event.preventDefault()
-		 	console.log("--------------")
-		 	console.log("win")
 		 	game.winScreen.pop()
-		 	console.log("experiment")
 		 	game.experiment.pop()
 
 		 	var dictionary = [1,2,3,4,5,6,7,8]
@@ -1809,7 +1922,7 @@ Mastermind.prototype.loginPage = function(update){
 
 	logic.prototype.setGuessTarget = function(_col,_row){
 
-		console.log("0")
+
 
 		if(_col === true){
 
@@ -1837,7 +1950,6 @@ Mastermind.prototype.loginPage = function(update){
 			}
 
 		}else{
-			console.log("saving last")
 			this.lastTarget.row = this.guessTarget.row
 			this.lastTarget.column = this.guessTarget.column
 		}
@@ -1872,8 +1984,6 @@ Mastermind.prototype.loginPage = function(update){
 
 		} else{
 
-			console.log("1")
-
 			this.guessTarget.column = 0
 			this.guessTarget.row = Math.floor(this.valuesSelected/this.secretSize)
 
@@ -1882,7 +1992,6 @@ Mastermind.prototype.loginPage = function(update){
 
 
 		if (this.guess[_col] != undefined) {
-			console.log("2")
 
 		 	this.guess[_col] = undefined
 		 	this.valuesSelected--
@@ -1890,14 +1999,12 @@ Mastermind.prototype.loginPage = function(update){
 			var empty = true
 
 			for(var i=0; i<this.secretSize;i++){
-				console.log(this.guess[i])
 				if(this.guess[i] != undefined){
 					empty = false
 				}
 			}
 
 			if(empty){
-				console.log("empty!")
 				this.mastermind.setcheckButton(false)
 			}
 
@@ -2037,7 +2144,6 @@ Mastermind.prototype.loginPage = function(update){
 				"r" : this.radius*0.9
 
 			})
-
 	}
 
 	logic.prototype.checkGuess = function(_row){
@@ -2137,17 +2243,14 @@ Mastermind.prototype.loginPage = function(update){
 		if(hint.correctPosition == this.secretSize){
 
 			var gameScore = (10-this.guessesMade)*(this.secretSize+this.dictSize)*10
-			this.mastermind.score += gameScore;
+			this.mastermind.score += game;
 			this.mastermind.displayWinScreen(gameScore,true)
 
-			console.log("youwin!");
 			var path = "games/" + this.mastermind.gameCount
 			mastermind.data.end = getCurretTime()
 			mastermind.data.NguessesMade = this.guessesMade
 			game.pushData(path, mastermind.data)
 
-			console.log("won--data written:");
-			console.log(mastermind.data);
 			return
 
 		//-- player loose the game!
@@ -2160,13 +2263,10 @@ Mastermind.prototype.loginPage = function(update){
 			game.pushData(path, mastermind.data)
 
 			this.mastermind.displayLooseScreen(gameScore)
-			console.log("lost--data written:");
-			console.log(mastermind.data);
 			return
 		}
 
 		this.guess = []
-		console.log("setting next target")
 		this.setGuessTarget()
 		this.guessesMade++
 		this.mastermind.setcheckButton(false)
@@ -2216,9 +2316,7 @@ Mastermind.prototype.loginPage = function(update){
 	var fireBase = new Firebase("https://psymastermind.firebaseio.com/")
 
 	window.addEventListener("resize", function(){
-
 		mastermind.update();
-
 	});
 
     var	getCurretTime = function(){
@@ -2238,41 +2336,52 @@ Mastermind.prototype.loginPage = function(update){
 		}
 	}
 
+	function gameStart(_data){
+		
+		game.setUserId(_data)
+	
+		game.customScreen.pop()
+
+		// remove html
+		var body = document.getElementById("body")			
+		aouth = document.getElementById("aouth")
+		if(aouth != undefined) body.removeChild(aouth)
+		
+		mastermind.gameStart()
+	}
+
+	function showLogin(){
+
+		if(game.experiment.getStatus()) game.experiment.pop()
+		if(game.customScreen.getStatus()) game.customScreen.pop()
+		mastermind.init()
+
+	}
+
 	window.addEventListener("load", checkPrivate)
 
+	//-----------------------------webfont
+		WebFontConfig = {
+	    	google: { families: [ 'Roboto:100,200,300,400,500,00,700,:latin' ] }
+	  	};
 
-	WebFontConfig = {
-    	google: { families: [ 'Roboto:100,200,300,400,500,00,700,:latin' ] }
-  	};
+	  	(function() {
+		    var wf = document.createElement('script');
+		    wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+		      '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+		    wf.type = 'text/javascript';
+		    wf.async = 'true';
+		    var s = document.getElementsByTagName('script')[0];
+		    s.parentNode.insertBefore(wf, s);
+	  	})();
 
-  	(function() {
-	    var wf = document.createElement('script');
-	    wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
-	      '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-	    wf.type = 'text/javascript';
-	    wf.async = 'true';
-	    var s = document.getElementsByTagName('script')[0];
-	    s.parentNode.insertBefore(wf, s);
-  	})();
 
-	fireBase.onAuth(function(authData){
-		if(authData){
-			game.setUserId(authData.uid)
-			game.customScreen.pop()
-
-			// remove html
-			var body = document.getElementById("body")			
-			aouth = document.getElementById("aouth")
-			if(aouth != undefined) body.removeChild(aouth)
+  	//------------------------------Firebase / gamestart
+		fireBase.onAuth(function(authData){
 			
-			console.log("outh data")
-			mastermind.gameStart()
-
-
-		}else{
-
-			if(game.experiment.getStatus()) game.experiment.pop()
-			if(game.customScreen.getStatus()) game.customScreen.pop()
-			mastermind.init()
-		}
-	});
+			if(authData){
+				gameStart(authData.uid)
+			}else{
+				showLogin()
+			}
+		});
