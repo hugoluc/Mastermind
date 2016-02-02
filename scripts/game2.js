@@ -158,7 +158,6 @@ Game.prototype.register = function(email,password){
 				if(_description.y2 != undefined) _description.y2 = _description.y2 + this.y + this.offset.y
 
 			}
-
 		}
 
 		// adsjust x and y based on child

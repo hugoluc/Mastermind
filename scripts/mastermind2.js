@@ -9,6 +9,12 @@ function Mastermind(_game){
 	this.tutorialStep = 0
 	this.displayTutorial = false
 	this.userStatus = undefined
+	this.customLeveSpecs = {
+
+		"color" : 5,
+		"holes" : 5,
+
+	}
 
 	this.colors = [
 		["#F45858","#CC3E3E"],
@@ -23,6 +29,24 @@ function Mastermind(_game){
 
 	this.custom = []
 }
+
+Mastermind.prototype.setCustomLevel = function(spec,operation){
+
+	if (operation == "add"){
+
+		if(this.customLeveSpecs[spec] < config.levelConfig.custom.max[spec] && this.customLeveSpecs[spec] >=  config.levelConfig.custom.min[spec] ){
+			this.customLeveSpecs[spec]++
+		}
+
+	}else if (operation == "remove"){
+
+		if(this.customLeveSpecs[spec] <= config.levelConfig.custom.max[spec] && this.customLeveSpecs[spec] >  config.levelConfig.custom.min[spec] ){
+			this.customLeveSpecs[spec]--
+		}
+
+	}
+}
+
 
 Mastermind.prototype.getGameCount = function(){
 
@@ -136,7 +160,7 @@ Mastermind.prototype.update = function(){
 				//this.tutorial(true,this.tutorialStep)
 				break
 			case "customLevel":
-				this.drawCustomSelector(true)
+				this.drawCustomSelector(true,false,"create","all")
 				break 
 		}
 	}
@@ -164,7 +188,8 @@ Mastermind.prototype.checkUpdate = function(_update,_object,_target){
 			"height" : _object.height,
 			"transform" : _object.transform,
 			"strokeWidth" : _object.strokeWidth,
-			"r" : _object.r
+			"r" : _object.r,
+			"text" : _object.text,
 		}
 
 		this.game[_target].updateSVGs(obj)
@@ -1203,107 +1228,250 @@ Mastermind.prototype.displayCustomSelector = function(){
 	this.game.customScreen.display()
 }
 
-Mastermind.prototype.drawCustomSelector = function(update){
+Mastermind.prototype.drawCustomSelector = function(update,drawPreview,action,which){
+
+	this.game.customScreen.setOffset(0,this.game.menu.height)
 
 	var controller = function(target){
 
+		var add,remove;
+
 		var offset = 0
-		var controllerArea = { "height" : game.customScreen.height*0.45 }
-		var controlerRadius = controllerArea.height*0.1
-		var spacing = controlerRadius
+		var controllerArea = { "height" : game.customScreen.height*0.42 }
+		var controlerRadius = controllerArea.height*0.15
+		var spacing = controlerRadius*0.3
 		controllerArea.width = (controlerRadius * 6) + (spacing*2) 
 
-
-
-
-		if(target == "color"){
+		if(target != "color"){
 			offset = controllerArea.height
+
+			 add = function(){ 
+			 	mastermind.setCustomLevel(target,"add")
+			 	mastermind.drawCustomSelector(true,true,"add","holes")
+			 }
+			 remove = function(){ 
+			 	mastermind.setCustomLevel(target,"remove")
+			 	mastermind.drawCustomSelector(true,true,"remove","holes")
+			 }
+
+		}else{
+
+			add = function(){ 
+			 	mastermind.setCustomLevel(target,"add")
+				mastermind.drawCustomSelector(true,true,"add","color")
+			}
+			remove = function(){ 
+			 	mastermind.setCustomLevel(target,"remove")
+				mastermind.drawCustomSelector(true,true,"remove","color")
+			}
+
 		}
 
 		var circlePosition = {
-			"y" : controllerArea.width*0.5,
+			"y" : controllerArea.height*0.4,
 			"x" : ((game.customScreen.width - controllerArea.width)/2)+controlerRadius,
 		}
 
-		console.log(circlePosition)
 
 		//--------------------------------LINE
-		mastermind.checkUpdate(update,{
+			mastermind.checkUpdate(update,{
 
-			"id" : "circle-line-"+target,
-			"child" : "customScreen",
-			"type" : "line",
-			"x1" : 0,
-			"x2" : game.customScreen.width,
-			"y1" : controllerArea.height+offset,
-			"y2" : controllerArea.height+offset,
-			"fill" : "#193749",
-		},"customScreen")
+				"id" : "circle-line-"+target,
+				"child" : "customScreen",
+				"type" : "line",
+				"x1" : 0,
+				"x2" : game.customScreen.width,
+				"y1" : controllerArea.height+offset,
+				"y2" : controllerArea.height+offset,
+				"fill" : "#193749",
+			},"customScreen")
 
 		//-------------------------------CIRCLES
-		mastermind.checkUpdate(update,{
+	
+			//----------Count
+			mastermind.checkUpdate(update,{
 
-			"id" : "circle-count-"+target,
-			"child" : "customScreen",
-			"type" : "circle",
-			"x" : circlePosition.x,
-			"y" : circlePosition.y+offset,
-			"strokeWidth" : this.radius*0.15,
-	 		"r" : controllerArea.height*0.1,
-	 		"fill" : "#E8E6E4",
-	 		"stroke" : "#E8E6E2",
-	 		"click" : function(){
+				"id" : "circle-count-"+target,
+				"child" : "customScreen",
+				"type" : "circle",
+				"x" : circlePosition.x,
+				"y" : circlePosition.y+offset,
+				"strokeWidth" : controlerRadius*0.05,
+				"r" : controlerRadius,
+		 		"fill" : "transparent",
+		 		"stroke" : "#487282",
+			},"customScreen")
 
-	 			console.log("yes")
+			
+			mastermind.checkUpdate(update,{
+				"id" : "text-count-"+target,
+				"child" : "winScreen",
+				"type" : "text",
+				"size" : controlerRadius*1.4,
+				"x" : circlePosition.x,
+				"y" : circlePosition.y + offset + controlerRadius*0.5,
+				"text" : mastermind.customLeveSpecs[target],
+				"fontWeight" : "regular",
+				"fill" : "#487282",
+			},"customScreen")
 
-	 		}
+			//----------add
+			mastermind.checkUpdate(update,{
 
-		},"customScreen")
+				"id" : "circle-add-"+target,
+				"child" : "customScreen",
+				"type" : "circle",
+				"x" : circlePosition.x + spacing + controlerRadius*2,
+				"y" : circlePosition.y+offset,
+				"strokeWidth" : controlerRadius*0.05,
+		 		"r" : controlerRadius,
+		 		"fill" : "#335d72",
+		 		"stroke" : "#487282",
+		 		"click" : add,
 
-		mastermind.checkUpdate(update,{
+			},"customScreen")
 
-			"id" : "circle-add-"+target,
-			"child" : "customScreen",
-			"type" : "circle",
-			"x" : circlePosition.x + spacing + controlerRadius*2,
-			"y" : circlePosition.y+offset,
-			"strokeWidth" : this.radius*0.5,
-	 		"r" : controllerArea.height*0.1,
-	 		"fill" : "#E8E6E4",
-	 		"stroke" : "#E8E6E2",
-	 		"click" : function(){
+			mastermind.checkUpdate(update,{
+				"id" : "text-add-"+target,
+				"child" : "winScreen",
+				"type" : "text",
+				"size" : controlerRadius*2,
+				"x" : circlePosition.x + (spacing*1) + (controlerRadius*2),
+				"y" : circlePosition.y + offset + controlerRadius*0.67,
+				"text" : "+",
+				"fontWeight" : "regular",
+				"fill" : "#7da5af",
+				"click" : add
+			},"customScreen")
+		
+			//----------remove
+				mastermind.checkUpdate(update,{
 
-	 			console.log("yes")
+					"id" : "circle-remove-"+target,
+					"child" : "customScreen",
+					"type" : "circle",
+					"x" : circlePosition.x + (spacing*2) + (controlerRadius*4),
+					"y" : circlePosition.y + offset,
+					"strokeWidth" : controlerRadius*0.05,
+			 		"r" : controlerRadius,
+			 		"fill" : "#335d72",
+			 		"stroke" : "#487282",
+			 		"click" : remove
 
-	 		}
+				},"customScreen")
 
-		},"customScreen")
+				mastermind.checkUpdate(update,{
+					"id" : "text-remove-"+target,
+					"child" : "winScreen",
+					"type" : "text",
+					"size" : controlerRadius*3,
+					"x" : circlePosition.x + (spacing*2) + (controlerRadius*4),
+					"y" : circlePosition.y + offset + controlerRadius*0.86,
+					"text" : "-",
+					"fontWeight" : "regular",
+					"fill" : "#7da5af",
+					"click" : remove
+				},"customScreen")
 
-		mastermind.checkUpdate(update,{
+		//-------------------------------PREVIEW
 
-			"id" : "circle-remove-"+target,
-			"child" : "customScreen",
-			"type" : "circle",
-			"x" : circlePosition.x + (spacing*2) + (controlerRadius*4),
-			"y" : circlePosition.y + offset,
-			"strokeWidth" : this.radius*0.5,
-	 		"r" : controllerArea.height*0.1,
-	 		"fill" : "#E8E6E4",
-	 		"stroke" : "#E8E6E2",
-	 		"click" : function(){
+			//calculate width:
 
-	 			console.log("yes")
+			var previewRadius = controlerRadius*0.7
+			var spacing = previewRadius*0.3
+			var previewBarWidth = (mastermind.customLeveSpecs[target]*previewRadius*2) + (mastermind.customLeveSpecs[target]+1)*spacing
+			// if smaller then width change the system!!!
 
-	 		}
+			mastermind.checkUpdate(update,{
 
-		},"customScreen")
+				"id" : "preview"+target,
+				"child" : "winScreen",
+				"type" : "rect",
+				"x" : (game.customScreen.width - previewBarWidth)/2,
+				"y" : circlePosition.y + offset + controlerRadius*1.5,
+				"rx" : controlerRadius*0.3,
+				"ry" : controlerRadius*0.3,
+				"width" : previewBarWidth,
+				"height" : controlerRadius*1.8,
+				"fill" : "#F4F4F4",
+			},"customScreen")
+
+			var updatePreview = update
+
+			if(drawPreview){
+
+				updatePreview = false 
+				for(var i=0; i<mastermind.customLeveSpecs[target]; i++){
+				
+					if(action == "remove" && i==0){
+						game.customScreen.removeSVG("Preview-circle"+which+"-"+mastermind.customLeveSpecs[target])
+					}
+					game.customScreen.removeSVG("Preview-circle"+which+"-"+i)			
+				}
+			}
+
+			for(var i=0; i<mastermind.customLeveSpecs[target]; i++){
+
+					console.log("--"+i)
+
+					var fill = "#cecece"
+					var stroke = "#cecece"
+
+					if(target == "color" ){
+
+						fill = mastermind.colors[i][0]
+						stroke = mastermind.colors[i][1]
+
+					}
+
+					mastermind.checkUpdate(updatePreview,{
+
+						"id" : "Preview-circle"+target+"-"+i,
+						"child" : "customScreen",
+						"type" : "circle",
+						"x" : ((game.customScreen.width - previewBarWidth)/2) + spacing*4.3 + ((previewRadius*2) + spacing)*i,
+						"y" : circlePosition.y + offset + controlerRadius*2.4,
+						"strokeWidth" : controlerRadius*0.1,
+				 		"r" : previewRadius,
+				 		"fill" : fill,
+				 		"stroke" : stroke,
+					},"customScreen")
+
+					if(drawPreview){ game.customScreen.updateSVGs({ "id" : "Preview-circle"+target+"-"+i,})}
+			}
+			
+
+		//-----------------------------------TITLE
+		
+			mastermind.checkUpdate(update,{
+					"id" : "text-"+target,
+					"child" : "winScreen",
+					"type" : "text",
+					"size" : controlerRadius*0.8,
+					"x" : circlePosition.x - controlerRadius*1,
+					"y" : circlePosition.y + offset - controlerRadius*1.5,
+					"text" : target[0].toUpperCase() + target.slice(1,target.length),
+					"align" : "left",
+					"fontWeight" : "300",
+					"fill" : "#aec2ce",
+					"click" : remove
+				},"customScreen")
 
 	}
 
 
-	controller("color")
-	console.log("*")
-	controller("holes")
+	console.log(which)
+	if(which == "color"){
+		controller("color")		
+	}else if(which == "holes"){
+		controller("holes")
+	}else{
+
+		controller("color")	
+		controller("holes")	
+	}
+
+
 }
 
 //----------------------------------------------------Win Screen

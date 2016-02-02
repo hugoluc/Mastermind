@@ -29,6 +29,15 @@ var config = {
 			"secretSize": 10,
 			"colors" : 5,
 			"dificulty" : 10,
+			"max" : {
+			
+				"color":10,
+				"holes":10
+			},
+			"min" : {
+				"color" : 3,
+				"holes" : 3,
+			}
 
 		} 
 
