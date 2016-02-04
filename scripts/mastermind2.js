@@ -1231,13 +1231,13 @@ Mastermind.prototype.displayCustomSelector = function(){
 Mastermind.prototype.drawCustomSelector = function(update,drawPreview,action,which){
 
 	this.game.customScreen.setOffset(0,this.game.menu.height)
+	var controllerArea = { "height" : game.customScreen.height*0.42 }
 
 	var controller = function(target){
 
 		var add,remove;
 
 		var offset = 0
-		var controllerArea = { "height" : game.customScreen.height*0.42 }
 		var controlerRadius = controllerArea.height*0.15
 		var spacing = controlerRadius*0.3
 		controllerArea.width = (controlerRadius * 6) + (spacing*2) 
@@ -1412,7 +1412,7 @@ Mastermind.prototype.drawCustomSelector = function(update,drawPreview,action,whi
 
 			for(var i=0; i<mastermind.customLeveSpecs[target]; i++){
 
-					console.log("--"+i)
+					//console.log("--"+i)
 
 					var fill = "#cecece"
 					var stroke = "#cecece"
@@ -1439,7 +1439,6 @@ Mastermind.prototype.drawCustomSelector = function(update,drawPreview,action,whi
 
 					if(drawPreview){ game.customScreen.updateSVGs({ "id" : "Preview-circle"+target+"-"+i,})}
 			}
-			
 
 		//-----------------------------------TITLE
 		
@@ -1459,8 +1458,37 @@ Mastermind.prototype.drawCustomSelector = function(update,drawPreview,action,whi
 
 	}
 
+	//------create button
 
-	console.log(which)
+	var play_button = {
+		"height" : game.customScreen.height*0.1
+	}
+	
+	play_button.width = play_button.height*2
+
+	mastermind.checkUpdate(update,{
+
+		"id" : "play-button",
+		"child" : "winScreen",
+		"type" : "rect",
+		"x" : (game.customScreen.width-play_button.width)/2,
+		"y" : controllerArea.height*2.06,
+		"rx" : 5,
+		"ry" : 5,
+		"width" : play_button.width,
+		"height" : play_button.height,
+		"fill" : "#F4F4F4",
+		"click" : function(){
+
+			var dictionary = [1,2,3,4,5,6,7,8]
+			game.customScreen.pop()
+		 	mastermind.createLevel(mastermind.customLeveSpecs.holes,mastermind.customLeveSpecs.color,dictionary,10,1)
+
+		}
+	},"customScreen")
+
+
+	//console.log(which)
 	if(which == "color"){
 		controller("color")		
 	}else if(which == "holes"){
@@ -1470,8 +1498,6 @@ Mastermind.prototype.drawCustomSelector = function(update,drawPreview,action,whi
 		controller("color")	
 		controller("holes")	
 	}
-
-
 }
 
 //----------------------------------------------------Win Screen
@@ -2250,7 +2276,6 @@ Mastermind.prototype.loginPage = function(update){
 
 			//var target = document.getElementById(this.guestTarget.row + "-" + this.guestTarget.column)
 			var target = document.getElementById(this.guessTarget.row + "-" + this.guessTarget.column)
-
 			var radius = target.getAttribute("r")
 
 			var obj= {
@@ -2268,23 +2293,28 @@ Mastermind.prototype.loginPage = function(update){
 			//-------------------------------------------------------------------
 			this.guess[this.guessTarget.column] = {"value":_pegValue,"checked":false}
 
-			if(this.guess.length > 0){
+			if(this.guess.length > 0 && config.other.incompleteCheck == true){
+			//if(this.guess.length > 0){
 				
 				this.mastermind.setcheckButton(true,row)
 
+			}else if(this.checkGuessFinished()){
+
+				this.mastermind.setcheckButton(true,row)
+			
 			}
 
-				if(this.checkGuessFinished()){
+			if(this.checkGuessFinished()){
 
-					this.setGuessTarget(_final=true)
+				this.setGuessTarget(_final=true)
 
-				}else{
+			}else{
 
-					this.setGuessTarget()
-
-				}
+				this.setGuessTarget()
 
 			}
+
+		}
 
 		return this.guess
 	}
@@ -2332,9 +2362,7 @@ Mastermind.prototype.loginPage = function(update){
 					this.guess[i] = {"value":0,"checked":false}
 					this.valuesSelected++
 				}
-
 			}
-
 		}
 
 		if(this.mastermind.displayTutorial){
@@ -2370,7 +2398,6 @@ Mastermind.prototype.loginPage = function(update){
 					"child" : "experiment",
 					"fill" : "#8C7F04",
 					"text" : hint.correctPosition,
-
 				})
 
 

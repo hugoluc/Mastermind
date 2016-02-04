@@ -31,7 +31,7 @@ var config = {
 			"dificulty" : 10,
 			"max" : {
 			
-				"color":10,
+				"color":8,
 				"holes":10
 			},
 			"min" : {
@@ -45,7 +45,7 @@ var config = {
 
 	"other" : {
 
-		"incompleteCheck" : false,
+		"incompleteCheck" : true,
 		"tutorial" : false,
 		"JarMode" : {
 

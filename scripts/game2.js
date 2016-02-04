@@ -192,7 +192,6 @@ Game.prototype.register = function(email,password){
 
 	Area.prototype.updateSVGs = function(_description){ 
 
-
 		var changeSize,svg,description
 	 	var all = false
 		var key = Object.keys(this.SVG)
@@ -313,19 +312,35 @@ Game.prototype.register = function(email,password){
 			conteiner.removeChild(svg)	
 		
 		}
+
+
+		//remove from this.svg
+		this.SVG[_id] = []
+
 	}
 
 	Area.prototype.pop = function(){
 
+		console.log("-------------POP!")
+
 	 	if(Object.keys(this.SVG).length > 0){
 			
 			var conteiner = document.getElementById("conteiner")
+			console.log(conteiner)
 			
-			for(attributes in this.SVG){		
+			for(attributes in this.SVG){	
 
 				var id = this.SVG[attributes].id
-				var svg = document.getElementById(id)
-				conteiner.removeChild(svg)
+
+				if(id != undefined){
+
+					console.log(id)
+					var svg = document.getElementById(id)
+					console.log(svg)
+					conteiner.removeChild(svg)
+
+				}	
+
 			}
 
 			this.SVG = []
@@ -387,6 +402,7 @@ winScreen.prototype.addSVG = function(description){
 	if(this.SVG["winScreen-bg"] == undefined){
 
 		var obj = {
+
 			"id" : "winScreen-bg",
 			"type" : "rect",
 			"width" : this.bgwidth,
