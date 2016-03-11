@@ -1243,6 +1243,7 @@ Mastermind.prototype.drawCustomSelector = function(update,drawPreview,action,whi
 		controllerArea.width = (controlerRadius * 6) + (spacing*2) 
 
 		if(target != "color"){
+
 			offset = controllerArea.height
 
 			 add = function(){ 
@@ -1478,6 +1479,26 @@ Mastermind.prototype.drawCustomSelector = function(update,drawPreview,action,whi
 		"width" : play_button.width,
 		"height" : play_button.height,
 		"fill" : "#F4F4F4",
+		"click" : function(){
+
+			var dictionary = [1,2,3,4,5,6,7,8]
+			game.customScreen.pop()
+		 	mastermind.createLevel(mastermind.customLeveSpecs.holes,mastermind.customLeveSpecs.color,dictionary,10,1)
+
+		}
+	},"customScreen")
+
+
+	mastermind.checkUpdate(update,{
+		"id" : "text-create-button",
+		"child" : "winScreen",
+		"type" : "text",
+		"size" : play_button.height*0.6,
+		"x" : (game.customScreen.width)/2,
+		"y" : controllerArea.height*2.225,
+		"text" : "create",
+		"fontWeight" : "regular",
+		"fill" : "#7da5af",
 		"click" : function(){
 
 			var dictionary = [1,2,3,4,5,6,7,8]
