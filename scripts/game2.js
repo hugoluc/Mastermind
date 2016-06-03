@@ -99,6 +99,7 @@ Game.prototype.register = function(email,password){
 			    console.log("Error creating user:", error);
 			  } else {
 			    console.log("Successfully created user account with uid:", userData.uid);
+			    alert("Thanks for registering! Now you can log in.");
 			 }
 	});
 }

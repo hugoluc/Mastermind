@@ -57,10 +57,11 @@ Game.prototype.login = function(email,password,callback){
 
 	function handler(error, authData){
 		if (error) {
-			console.log("Login Failed!", error);
+			console.log("Log in error:", error);
+			alert("Sorry! Login error: " + error);
 			loggedIn = false
 		} else {
-			console.log("sucess!")
+			console.log("success!")
 		}
 	}
 
@@ -97,9 +98,11 @@ Game.prototype.register = function(email,password){
 			function(error, userData) {
 			  if (error) {
 			    console.log("Error creating user:", error);
+			    alert("Registration error: " + error);
+			    // GK: send an email with new random password? (better: a password change form)
 			  } else {
 			    console.log("Successfully created user account with uid:", userData.uid);
-			    alert("Thanks for registering! Now you can log in.")
+			    alert("Thanks for registering! Now you can log in.");
 			 }
 	});
 }
@@ -159,7 +162,6 @@ Game.prototype.register = function(email,password){
 				if(_description.y2 != undefined) _description.y2 = _description.y2 + this.y + this.offset.y
 
 			}
-
 		}
 
 		// adsjust x and y based on child
@@ -193,7 +195,6 @@ Game.prototype.register = function(email,password){
 	}
 
 	Area.prototype.updateSVGs = function(_description){ 
-
 
 		var changeSize,svg,description
 	 	var all = false
@@ -315,19 +316,35 @@ Game.prototype.register = function(email,password){
 			conteiner.removeChild(svg)	
 		
 		}
+
+
+		//remove from this.svg
+		this.SVG[_id] = []
+
 	}
 
 	Area.prototype.pop = function(){
 
+		console.log("-------------POP!")
+
 	 	if(Object.keys(this.SVG).length > 0){
 			
 			var conteiner = document.getElementById("conteiner")
+			console.log(conteiner)
 			
-			for(attributes in this.SVG){		
+			for(attributes in this.SVG){	
 
 				var id = this.SVG[attributes].id
-				var svg = document.getElementById(id)
-				conteiner.removeChild(svg)
+
+				if(id != undefined){
+
+					console.log(id)
+					var svg = document.getElementById(id)
+					console.log(svg)
+					conteiner.removeChild(svg)
+
+				}	
+
 			}
 
 			this.SVG = []
@@ -389,6 +406,7 @@ winScreen.prototype.addSVG = function(description){
 	if(this.SVG["winScreen-bg"] == undefined){
 
 		var obj = {
+
 			"id" : "winScreen-bg",
 			"type" : "rect",
 			"width" : this.bgwidth,

@@ -1,4 +1,4 @@
-var fire_address = "https://mastermind1.firebaseio.com"
+var fire_addr = "https://mastermind1.firebaseio.com"
 
 var config = {
 
